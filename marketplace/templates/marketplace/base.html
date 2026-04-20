@@ -225,6 +225,97 @@
                 padding: 0.6rem 0.65rem;
             }
         }
+
+        @media (max-width: 991.98px) {
+            .mp-navbar {
+                padding: 0.42rem 0;
+            }
+            .mp-navbar .navbar-brand {
+                font-size: 1.2rem;
+            }
+            .mp-navbar .navbar-toggler {
+                border: 1px solid #e5e7eb;
+                border-radius: 8px;
+                padding: 0.2rem 0.5rem;
+            }
+            #mpNav {
+                margin-top: 0.6rem;
+                border-top: 1px solid #e5e7eb;
+                padding-top: 0.6rem;
+            }
+            #mpNav .navbar-nav {
+                align-items: stretch !important;
+                gap: 0.3rem !important;
+            }
+            #mpNav .nav-link {
+                padding: 0.55rem 0.7rem;
+                border-radius: 8px;
+                font-size: 0.88rem;
+            }
+            #mpNav .btn-post {
+                width: 100%;
+                justify-content: center;
+                margin-left: 0 !important;
+                padding: 0.52rem 0.8rem;
+            }
+            #mpNav .dropdown,
+            #mpNav .dropdown-menu {
+                width: 100%;
+            }
+            #mpNav .dropdown-menu {
+                position: static !important;
+                transform: none !important;
+                border: 1px solid #e5e7eb;
+                box-shadow: none;
+                margin-top: 0.3rem;
+                border-radius: 10px;
+            }
+            .mp-mobile-search .form-control {
+                border-radius: 12px 0 0 12px;
+                font-size: 0.85rem;
+            }
+            .mp-mobile-search .btn-search {
+                border-radius: 0 12px 12px 0;
+                padding: 0.42rem 0.75rem;
+            }
+            #listingModal .listing-modal-content {
+                height: 90vh;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .mp-navbar .navbar-brand {
+                font-size: 1.06rem;
+            }
+            .mp-navbar .container {
+                padding-left: 0.7rem;
+                padding-right: 0.7rem;
+            }
+            .user-avatar {
+                width: 32px;
+                height: 32px;
+                font-size: 0.78rem;
+            }
+            .mp-mobile-search .form-control {
+                font-size: 0.8rem;
+                padding-left: 0.7rem;
+            }
+            .mp-footer {
+                padding: 2.1rem 0 1.1rem;
+                margin-top: 2.4rem;
+            }
+            .mp-footer .brand {
+                font-size: 1.22rem;
+            }
+            .footer-bottom {
+                margin-top: 1.6rem;
+                padding-top: 1rem;
+            }
+            #listingModal .listing-modal-content {
+                height: 94vh;
+                border-radius: 12px 12px 0 0;
+            }
+        }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
@@ -248,6 +339,10 @@
         </button>
 
         <div class="collapse navbar-collapse" id="mpNav">
+            <form class="mp-mobile-search d-flex d-lg-none mb-2" action="{% url 'marketplace:listing_list' %}" method="get">
+                <input class="form-control" type="text" name="q" placeholder="Search rooms..." value="{{ request.GET.q|default:'' }}">
+                <button class="btn-search" type="submit"><i class="bi bi-search"></i></button>
+            </form>
             <ul class="navbar-nav ms-auto align-items-center gap-1">
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'marketplace:listing_list' %}"><i class="bi bi-search me-1"></i>Browse Rooms</a>

@@ -314,6 +314,84 @@
         border: 1px solid #f1f5f9 !important;
     }
     .fw-800 { font-weight: 700; }
+
+    @media (max-width: 991.98px) {
+        .filter-card.sticky-top {
+            position: static !important;
+            top: auto !important;
+        }
+        #listViewContainer {
+            display: none !important;
+        }
+        #gridViewContainer .listing-item {
+            width: 50%;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .container.py-4 {
+            padding-top: 0.85rem !important;
+            padding-bottom: 1rem !important;
+        }
+        .filter-card {
+            padding: 0.9rem !important;
+            border-radius: 10px !important;
+        }
+        .filter-card .form-select,
+        .filter-card .form-control {
+            font-size: 0.8rem !important;
+        }
+        .listing-item .listing-card-img {
+            height: 160px;
+        }
+        .listing-item .listing-card-body {
+            padding: 0.62rem !important;
+        }
+        .listing-meta {
+            flex-direction: column;
+            align-items: flex-start !important;
+            gap: 0.2rem;
+        }
+        .view-details-text {
+            font-size: 0.62rem !important;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .row.align-items-center .col-md-6 h2 {
+            font-size: 1.25rem !important;
+        }
+        .row.align-items-center .col-md-6 p {
+            font-size: 0.82rem !important;
+        }
+        .row.align-items-center .form-control {
+            font-size: 0.82rem !important;
+            padding: 0.72rem 2.9rem 0.72rem 0.85rem !important;
+        }
+        .row.align-items-center .btn {
+            padding: 0.4rem 0.65rem !important;
+        }
+        #gridViewContainer .listing-item {
+            width: 100%;
+        }
+        .listing-item .listing-card-img {
+            height: 170px;
+        }
+        .listing-item .listing-title {
+            font-size: 0.82rem !important;
+        }
+        .listing-item .listing-location {
+            font-size: 0.73rem !important;
+        }
+        .save-btn {
+            width: 30px !important;
+            height: 30px !important;
+        }
+        .text-center.py-5.bg-white.shadow-sm {
+            border-radius: 14px !important;
+            padding: 2rem 1rem !important;
+        }
+    }
 </style>
 {% block extra_js %}
 <script>

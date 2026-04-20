@@ -265,6 +265,113 @@
         color: #92400e;
         font-weight: 500;
     }
+
+    @media (max-width: 991.98px) {
+        .detail-hero .hero-title {
+            font-size: 1.45rem;
+        }
+        .photo-gallery img,
+        .photo-gallery .d-flex[style*="height: 350px"] {
+            height: 300px !important;
+        }
+        .sticky-top {
+            position: static !important;
+        }
+        .quick-actions {
+            grid-template-columns: 1fr;
+        }
+        .amenity-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .container[style*="padding-top: 1rem"] {
+            padding-top: 0.7rem !important;
+        }
+        .breadcrumb {
+            font-size: 0.72rem !important;
+            padding: 0.42rem 0.55rem !important;
+        }
+        .detail-hero {
+            padding: 0.8rem 0;
+        }
+        .detail-hero .hero-title {
+            font-size: 1.2rem;
+            line-height: 1.3;
+        }
+        .detail-hero .hero-price {
+            font-size: 1.18rem;
+            margin-top: 0.25rem;
+        }
+        .hero-tag {
+            font-size: 0.68rem;
+            padding: 0.3rem 0.56rem;
+            margin-right: 0.32rem;
+        }
+        .photo-gallery img,
+        .photo-gallery .d-flex[style*="height: 350px"] {
+            height: 240px !important;
+        }
+        .info-card,
+        .enquiry-card,
+        .landlord-card,
+        .qr-room-card {
+            border-radius: 0.45rem;
+            padding: 0.65rem;
+        }
+        .info-card h5 {
+            font-size: 0.82rem;
+        }
+        .table-custom th,
+        .table-custom td {
+            padding: 0.45rem 0.5rem;
+            font-size: 0.78rem;
+        }
+        .map-placeholder {
+            height: 145px;
+            margin-bottom: 0.55rem;
+        }
+        .stat-badge {
+            font-size: 0.68rem;
+            padding: 0.28rem 0.54rem;
+        }
+        .amenity-item {
+            font-size: 0.74rem;
+            padding: 0.42rem;
+        }
+        .quick-action-btn {
+            font-size: 0.76rem;
+            padding: 0.44rem;
+        }
+        .qr-room-card .qr-image {
+            width: 128px;
+            height: 128px;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .detail-hero .hero-title {
+            font-size: 1.06rem;
+        }
+        .detail-hero .hero-location {
+            font-size: 0.75rem !important;
+        }
+        .photo-gallery img,
+        .photo-gallery .d-flex[style*="height: 350px"] {
+            height: 210px !important;
+        }
+        .amenity-grid {
+            grid-template-columns: 1fr;
+        }
+        .table-custom th,
+        .table-custom td {
+            font-size: 0.74rem;
+        }
+        .section-divider {
+            margin: 0.75rem 0;
+        }
+    }
 </style>
 {% endblock %}
 
