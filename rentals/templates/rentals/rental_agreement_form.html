@@ -1,0 +1,169 @@
+{% extends 'rentals/base.html' %}
+
+{% block title %}Create Rental Agreement{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Create Rental Agreement</h2>
+    <a href="{% url 'rentals:rental_detail' rental.pk %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i>Back to Rental
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Rental Agreement Details</h5>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>
+            Creating agreement for: <strong>{{ rental.property_obj.name }}</strong> - 
+            {% if rental.tenant %}{{ rental.tenant.name }}{% else %}No tenant assigned{% endif %}
+        </div>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="{{ form.title.id_for_label }}" class="form-label">Agreement Title *</label>
+                        {{ form.title }}
+                        {% if form.title.errors %}
+                        <div class="text-danger small mt-1">{{ form.title.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="{{ form.agreement_type.id_for_label }}" class="form-label">Agreement Type *</label>
+                        {{ form.agreement_type }}
+                        {% if form.agreement_type.errors %}
+                        <div class="text-danger small mt-1">{{ form.agreement_type.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="{{ form.status.id_for_label }}" class="form-label">Status *</label>
+                        {{ form.status }}
+                        {% if form.status.errors %}
+                        <div class="text-danger small mt-1">{{ form.status.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="{{ form.effective_date.id_for_label }}" class="form-label">Effective Date *</label>
+                        {{ form.effective_date }}
+                        {% if form.effective_date.errors %}
+                        <div class="text-danger small mt-1">{{ form.effective_date.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="{{ form.expiry_date.id_for_label }}" class="form-label">Expiry Date</label>
+                        {{ form.expiry_date }}
+                        {% if form.expiry_date.errors %}
+                        <div class="text-danger small mt-1">{{ form.expiry_date.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="{{ form.rent_amount.id_for_label }}" class="form-label">Rent Amount *</label>
+                        {{ form.rent_amount }}
+                        {% if form.rent_amount.errors %}
+                        <div class="text-danger small mt-1">{{ form.rent_amount.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="{{ form.currency.id_for_label }}" class="form-label">Currency</label>
+                        {{ form.currency }}
+                        {% if form.currency.errors %}
+                        <div class="text-danger small mt-1">{{ form.currency.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="{{ form.payment_frequency.id_for_label }}" class="form-label">Payment Frequency</label>
+                        {{ form.payment_frequency }}
+                        {% if form.payment_frequency.errors %}
+                        <div class="text-danger small mt-1">{{ form.payment_frequency.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="{{ form.security_deposit.id_for_label }}" class="form-label">Security Deposit</label>
+                        {{ form.security_deposit }}
+                        {% if form.security_deposit.errors %}
+                        <div class="text-danger small mt-1">{{ form.security_deposit.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <div class="form-check mt-4">
+                            {{ form.deposit_paid }}
+                            <label class="form-check-label" for="{{ form.deposit_paid.id_for_label }}">
+                                Deposit Paid
+                            </label>
+                        </div>
+                        {% if form.deposit_paid.errors %}
+                        <div class="text-danger small mt-1">{{ form.deposit_paid.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="{{ form.terms.id_for_label }}" class="form-label">Terms and Conditions</label>
+                {{ form.terms }}
+                {% if form.terms.errors %}
+                <div class="text-danger small mt-1">{{ form.terms.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="mb-3">
+                <label for="{{ form.special_conditions.id_for_label }}" class="form-label">Special Conditions</label>
+                {{ form.special_conditions }}
+                {% if form.special_conditions.errors %}
+                <div class="text-danger small mt-1">{{ form.special_conditions.errors }}</div>
+                        {% endif %}
+            </div>
+
+            <div class="mb-3">
+                <label for="{{ form.agreement_file.id_for_label }}" class="form-label">Agreement Document</label>
+                {{ form.agreement_file }}
+                {% if form.agreement_file.errors %}
+                <div class="text-danger small mt-1">{{ form.agreement_file.errors }}</div>
+                {% endif %}
+                <div class="form-text">Upload signed agreement document (PDF, DOC, DOCX)</div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save me-1"></i>Create Agreement
+                </button>
+                <a href="{% url 'rentals:rental_detail' rental.pk %}" class="btn btn-secondary">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

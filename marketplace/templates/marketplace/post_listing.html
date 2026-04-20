@@ -1,0 +1,235 @@
+{% extends 'marketplace/base.html' %}
+{% block title %}{% if edit %}Edit Listing{% else %}Post a Room{% endif %} — RoomFinder{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width:780px;">
+    <div class="mb-4">
+        <h2 class="fw-800" style="font-size:1.6rem;">{% if edit %}Edit Listing{% else %}Post a Room{% endif %}</h2>
+        <p class="text-muted" style="font-size:0.92rem;">Fill in the details below. Fields marked * are required.</p>
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Basic info -->
+        <div class="bg-white rounded-3 p-4 mb-4 shadow-sm">
+            <h6 class="fw-700 mb-3" style="font-size:0.9rem;text-transform:uppercase;letter-spacing:0.5px;color:#6b7280;">Basic Information</h6>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold" style="font-size:0.88rem;">Listing Title *</label>
+                {{ form.title }}
+                {% if form.title.errors %}<div class="text-danger" style="font-size:0.8rem;">{{ form.title.errors.0 }}</div>{% endif %}
+                <div class="form-text">E.g. "Double room in bright modern flat, city centre"</div>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold" style="font-size:0.88rem;">Room Type *</label>
+                    {{ form.room_type }}
+                    {% if form.room_type.errors %}<div class="text-danger" style="font-size:0.8rem;">{{ form.room_type.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold" style="font-size:0.88rem;">Property Type *</label>
+                    {{ form.property_type }}
+                    {% if form.property_type.errors %}<div class="text-danger" style="font-size:0.8rem;">{{ form.property_type.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold" style="font-size:0.88rem;">Description *</label>
+                {{ form.description }}
+                {% if form.description.errors %}<div class="text-danger" style="font-size:0.8rem;">{{ form.description.errors.0 }}</div>{% endif %}
+            </div>
+        </div>
+
+        <!-- Location -->
+        <div class="bg-white rounded-3 p-4 mb-4 shadow-sm">
+            <h6 class="fw-700 mb-3" style="font-size:0.9rem;text-transform:uppercase;letter-spacing:0.5px;color:#6b7280;">Location</h6>
+            <div class="mb-3">
+                <label class="form-label fw-semibold" style="font-size:0.88rem;">Full Address *</label>
+                {{ form.address }}
+                {% if form.address.errors %}<div class="text-danger" style="font-size:0.8rem;">{{ form.address.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold" style="font-size:0.88rem;">City *</label>
+                    {{ form.city }}
+                    {% if form.city.errors %}<div class="text-danger" style="font-size:0.8rem;">{{ form.city.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold" style="font-size:0.88rem;">Postcode *</label>
+                    {{ form.postcode }}
+                    {% if form.postcode.errors %}<div class="text-danger" style="font-size:0.8rem;">{{ form.postcode.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Pricing -->
+        <div class="bg-white rounded-3 p-4 mb-4 shadow-sm">
+            <h6 class="fw-700 mb-3" style="font-size:0.9rem;text-transform:uppercase;letter-spacing:0.5px;color:#6b7280;">Pricing</h6>
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold" style="font-size:0.88rem;">Monthly Rent *</label>
+                    {{ form.monthly_rent }}
+                    {% if form.monthly_rent.errors %}<div class="text-danger" style="font-size:0.8rem;">{{ form.monthly_rent.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold" style="font-size:0.88rem;">Deposit</label>
+                    {{ form.deposit }}
+                </div>
+                <div class="col-md-4 d-flex align-items-end pb-1">
+                    <div class="form-check">
+                        {{ form.bills_included }}
+                        <label class="form-check-label" for="{{ form.bills_included.id_for_label }}" style="font-size:0.88rem;">Bills included</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Availability -->
+        <div class="bg-white rounded-3 p-4 mb-4 shadow-sm">
+            <h6 class="fw-700 mb-3" style="font-size:0.9rem;text-transform:uppercase;letter-spacing:0.5px;color:#6b7280;">Availability</h6>
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold" style="font-size:0.88rem;">Available From *</label>
+                    {{ form.available_from }}
+                    {% if form.available_from.errors %}<div class="text-danger" style="font-size:0.8rem;">{{ form.available_from.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold" style="font-size:0.88rem;">Minimum Term</label>
+                    {{ form.min_term }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold" style="font-size:0.88rem;">Maximum Term</label>
+                    {{ form.max_term }}
+                </div>
+            </div>
+            <div class="row g-3 mt-1">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold" style="font-size:0.88rem;">Current occupants</label>
+                    {{ form.current_occupants }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold" style="font-size:0.88rem;">Total rooms</label>
+                    {{ form.max_occupants }}
+                </div>
+                <div class="col-md-4 d-flex align-items-end pb-1">
+                    <div class="form-check">
+                        {{ form.furnished }}
+                        <label class="form-check-label" for="{{ form.furnished.id_for_label }}" style="font-size:0.88rem;">Furnished</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- House rules -->
+        <div class="bg-white rounded-3 p-4 mb-4 shadow-sm">
+            <h6 class="fw-700 mb-3" style="font-size:0.9rem;text-transform:uppercase;letter-spacing:0.5px;color:#6b7280;">House Rules</h6>
+            <div class="row g-2">
+                <div class="col-6 col-md-4"><div class="form-check">{{ form.smokers_ok }}<label class="form-check-label" for="{{ form.smokers_ok.id_for_label }}" style="font-size:0.88rem;">Smokers OK</label></div></div>
+                <div class="col-6 col-md-4"><div class="form-check">{{ form.pets_ok }}<label class="form-check-label" for="{{ form.pets_ok.id_for_label }}" style="font-size:0.88rem;">Pets OK</label></div></div>
+                <div class="col-6 col-md-4"><div class="form-check">{{ form.couples_ok }}<label class="form-check-label" for="{{ form.couples_ok.id_for_label }}" style="font-size:0.88rem;">Couples OK</label></div></div>
+                <div class="col-6 col-md-4"><div class="form-check">{{ form.students_ok }}<label class="form-check-label" for="{{ form.students_ok.id_for_label }}" style="font-size:0.88rem;">Students OK</label></div></div>
+                <div class="col-6 col-md-4"><div class="form-check">{{ form.dss_ok }}<label class="form-check-label" for="{{ form.dss_ok.id_for_label }}" style="font-size:0.88rem;">DSS/Housing benefit OK</label></div></div>
+            </div>
+        </div>
+
+        <!-- Amenities -->
+        <div class="bg-white rounded-3 p-4 mb-4 shadow-sm">
+            <h6 class="fw-700 mb-3" style="font-size:0.9rem;text-transform:uppercase;letter-spacing:0.5px;color:#6b7280;">Amenities</h6>
+            <div class="row g-2">
+                <div class="col-6 col-md-4"><div class="form-check">{{ form.has_wifi }}<label class="form-check-label" for="{{ form.has_wifi.id_for_label }}" style="font-size:0.88rem;">Broadband/WiFi included</label></div></div>
+                <div class="col-6 col-md-4"><div class="form-check">{{ form.has_parking }}<label class="form-check-label" for="{{ form.has_parking.id_for_label }}" style="font-size:0.88rem;">Parking</label></div></div>
+                <div class="col-6 col-md-4"><div class="form-check">{{ form.has_garage }}<label class="form-check-label" for="{{ form.has_garage.id_for_label }}" style="font-size:0.88rem;">Garage</label></div></div>
+                <div class="col-6 col-md-4"><div class="form-check">{{ form.has_garden }}<label class="form-check-label" for="{{ form.has_garden.id_for_label }}" style="font-size:0.88rem;">Garden/patio</label></div></div>
+                <div class="col-6 col-md-4"><div class="form-check">{{ form.has_balcony }}<label class="form-check-label" for="{{ form.has_balcony.id_for_label }}" style="font-size:0.88rem;">Balcony/roof terrace</label></div></div>
+                <div class="col-6 col-md-4"><div class="form-check">{{ form.has_disabled_access }}<label class="form-check-label" for="{{ form.has_disabled_access.id_for_label }}" style="font-size:0.88rem;">Disabled access</label></div></div>
+                <div class="col-6 col-md-4"><div class="form-check">{{ form.has_living_room }}<label class="form-check-label" for="{{ form.has_living_room.id_for_label }}" style="font-size:0.88rem;">Living room</label></div></div>
+                <div class="col-6 col-md-4"><div class="form-check">{{ form.has_washing_machine }}<label class="form-check-label" for="{{ form.has_washing_machine.id_for_label }}" style="font-size:0.88rem;">Washing machine</label></div></div>
+                <div class="col-6 col-md-4"><div class="form-check">{{ form.has_dishwasher }}<label class="form-check-label" for="{{ form.has_dishwasher.id_for_label }}" style="font-size:0.88rem;">Dishwasher</label></div></div>
+            </div>
+        </div>
+
+        <!-- Current Household -->
+        <div class="bg-white rounded-3 p-4 mb-4 shadow-sm">
+            <h6 class="fw-700 mb-3" style="font-size:0.9rem;text-transform:uppercase;letter-spacing:0.5px;color:#6b7280;">Current Household</h6>
+            <div class="row g-3 mb-3">
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold" style="font-size:0.88rem;">Min age</label>
+                    {{ form.hh_min_age }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold" style="font-size:0.88rem;">Max age</label>
+                    {{ form.hh_max_age }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold" style="font-size:0.88rem;">Occupation</label>
+                    {{ form.hh_occupation }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold" style="font-size:0.88rem;">Gender</label>
+                    {{ form.hh_gender }}
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-semibold" style="font-size:0.88rem;">University (if students)</label>
+                {{ form.hh_university }}
+            </div>
+            <div class="row g-2">
+                <div class="col-6 col-md-4"><div class="form-check">{{ form.hh_smoker }}<label class="form-check-label" for="{{ form.hh_smoker.id_for_label }}" style="font-size:0.88rem;">Current occupants smoke</label></div></div>
+                <div class="col-6 col-md-4"><div class="form-check">{{ form.hh_pets }}<label class="form-check-label" for="{{ form.hh_pets.id_for_label }}" style="font-size:0.88rem;">Current occupants have pets</label></div></div>
+            </div>
+        </div>
+
+        <!-- New Flatmate Preferences -->
+        <div class="bg-white rounded-3 p-4 mb-4 shadow-sm">
+            <h6 class="fw-700 mb-3" style="font-size:0.9rem;text-transform:uppercase;letter-spacing:0.5px;color:#6b7280;">New Flatmate Preferences</h6>
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold" style="font-size:0.88rem;">Preferred occupation</label>
+                    {{ form.preferred_occupation }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold" style="font-size:0.88rem;">Min preferred age</label>
+                    {{ form.min_preferred_age }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold" style="font-size:0.88rem;">Max preferred age</label>
+                    {{ form.max_preferred_age }}
+                </div>
+            </div>
+            <div class="row g-2">
+                <div class="col-6 col-md-4"><div class="form-check">{{ form.references_required }}<label class="form-check-label" for="{{ form.references_required.id_for_label }}" style="font-size:0.88rem;">References required</label></div></div>
+            </div>
+        </div>
+
+        <!-- Photos -->
+        <div class="bg-white rounded-3 p-4 mb-4 shadow-sm">
+            <h6 class="fw-700 mb-3" style="font-size:0.9rem;text-transform:uppercase;letter-spacing:0.5px;color:#6b7280;">Photos</h6>
+            {% if edit and listing.photos.all %}
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                {% for photo in listing.photos.all %}
+                <img src="{{ photo.image.url }}" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:2px solid #e5e7eb;" alt="">
+                {% endfor %}
+            </div>
+            {% endif %}
+            <label class="form-label fw-semibold" style="font-size:0.88rem;">{% if edit %}Add more photos{% else %}Upload photos{% endif %}</label>
+            <input type="file" name="photos" class="form-control" multiple accept="image/*">
+            <div class="form-text">First photo will be used as the main image. JPG, PNG, WebP accepted.</div>
+        </div>
+
+        <div class="d-flex gap-3">
+            <button type="submit" class="btn fw-bold px-5 py-2" style="background:#3B6FE8;color:#fff;border-radius:8px;">
+                <i class="bi bi-{% if edit %}check-circle{% else %}plus-circle{% endif %} me-2"></i>
+                {% if edit %}Save Changes{% else %}Post Listing{% endif %}
+            </button>
+            <a href="{% url 'marketplace:dashboard' %}" class="btn btn-outline-secondary fw-semibold px-4 py-2" style="border-radius:8px;">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<style>
+.form-control, .form-select { font-size: 0.88rem; border-color: #e5e7eb; border-radius: 8px; }
+.form-control:focus, .form-select:focus { border-color: #3B6FE8; box-shadow: 0 0 0 3px rgba(59,111,232,0.1); }
+</style>
+{% endblock %}

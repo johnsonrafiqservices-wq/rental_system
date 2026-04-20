@@ -1,0 +1,193 @@
+{% extends 'rentals/base.html' %}
+
+{% block title %}{{ budget.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="mb-1 fw-800" style="color: #0f172a;">{{ budget.name }}</h4>
+            <span class="badge {% if budget.status == 'active' %}bg-success{% elif budget.status == 'draft' %}bg-warning{% else %}bg-secondary{% endif %}">
+                {{ budget.get_status_display }}
+            </span>
+            <span class="text-muted ms-2">{{ budget.start_date|date:"d M Y" }} - {{ budget.end_date|date:"d M Y" }}</span>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'billing:budget_item_create' budget.pk %}" class="btn btn-success btn-sm">
+                <i class="bi bi-plus-circle me-1"></i>Add Item
+            </a>
+            <a href="{% url 'billing:budget_edit' budget.pk %}" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-pencil me-1"></i>Edit
+            </a>
+        </div>
+    </div>
+
+    <!-- Budget Overview Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+                <div class="card-body text-center py-3">
+                    <div style="font-size:1.8rem;font-weight:800;color:#3B6FE8;">{{ budget.currency }} {{ budget.total_budgeted|floatformat:0 }}</div>
+                    <div style="font-size:0.78rem;color:#6b7280;">Total Budgeted</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+                <div class="card-body text-center py-3">
+                    <div style="font-size:1.8rem;font-weight:800;color:#ef4444;">{{ budget.currency }} {{ budget.total_spent|floatformat:0 }}</div>
+                    <div style="font-size:0.78rem;color:#6b7280;">Total Spent</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+                <div class="card-body text-center py-3">
+                    <div style="font-size:1.8rem;font-weight:800;color:#10b981;">{{ budget.currency }} {{ budget.remaining|floatformat:0 }}</div>
+                    <div style="font-size:0.78rem;color:#6b7280;">Remaining</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Utilization Progress -->
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
+        <div class="card-body p-4">
+            <h6 class="fw-bold mb-3">Budget Utilization</h6>
+            <div class="progress" style="height: 20px;">
+                <div class="progress-bar {% if budget.utilization_percentage > 90 %}bg-danger{% elif budget.utilization_percentage > 70 %}bg-warning{% else %}bg-success{% endif %}" 
+                     role="progressbar" 
+                     style="width: {{ budget.utilization_percentage }}%">
+                    {{ budget.utilization_percentage }}%
+                </div>
+            </div>
+            <div class="d-flex justify-content-between mt-2">
+                <small class="text-muted">{{ budget.total_spent|floatformat:0 }} spent</small>
+                <small class="text-muted">{{ budget.total_budgeted|floatformat:0 }} budgeted</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Budget Items -->
+    <div class="card border-0 shadow-sm" style="border-radius: 12px; overflow: hidden;">
+        <div class="card-header bg-white py-3 border-bottom">
+            <h6 class="mb-0 fw-bold" style="color: #0f172a;">Budget Items</h6>
+        </div>
+        <div class="card-body p-0">
+            {% if items %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 compact-table">
+                    <thead>
+                        <tr>
+                            <th class="ps-3">Category</th>
+                            <th>Description</th>
+                            <th>Budgeted</th>
+                            <th>Spent</th>
+                            <th>Remaining</th>
+                            <th>Utilization</th>
+                            <th class="pe-3 text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr class="compact-row">
+                            <td class="ps-3"><span class="compact-type">{{ item.get_category_display }}</span></td>
+                            <td class="compact-title">{{ item.description }}</td>
+                            <td class="compact-price">{{ budget.currency }} {{ item.amount|floatformat:0 }}</td>
+                            <td class="compact-location">{{ budget.currency }} {{ item.spent|floatformat:0 }}</td>
+                            <td class="{% if item.remaining < 0 %}text-danger{% else %}text-success{% endif %}">
+                                {{ budget.currency }} {{ item.remaining|floatformat:0 }}
+                            </td>
+                            <td>
+                                <div class="progress" style="height: 6px; width: 60px;">
+                                    <div class="progress-bar {% if item.utilization_percentage > 90 %}bg-danger{% elif item.utilization_percentage > 70 %}bg-warning{% else %}bg-success{% endif %}" 
+                                         role="progressbar" 
+                                         style="width: {{ item.utilization_percentage }}%"></div>
+                                </div>
+                                <small class="text-muted" style="font-size: 0.7rem;">{{ item.utilization_percentage }}%</small>
+                            </td>
+                            <td class="pe-3 text-end">
+                                <form method="post" action="{% url 'billing:budget_item_delete' item.pk %}" class="d-inline" onsubmit="return confirm('Delete this budget item?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger compact-action-btn">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-list-check" style="font-size:3rem;color:#cbd5e1;"></i>
+                <p class="text-muted mt-2">No budget items yet. Add items to track expenses by category.</p>
+                <a href="{% url 'billing:budget_item_create' budget.pk %}" class="btn btn-success btn-sm">Add Budget Item</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if budget.notes %}
+    <div class="card border-0 shadow-sm mt-4" style="border-radius: 12px;">
+        <div class="card-body">
+            <h6 class="fw-bold mb-2">Notes</h6>
+            <p class="text-muted mb-0">{{ budget.notes|linebreaks }}</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .compact-table {
+        font-size: 0.85rem;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    .compact-table thead th {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 0.75rem 0.5rem;
+        border-bottom: 1px solid #e2e8f0;
+        background: #f8fafc;
+    }
+    .compact-table tbody tr {
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .compact-table tbody td {
+        padding: 0.6rem 0.5rem;
+        vertical-align: middle;
+    }
+    .compact-title {
+        font-weight: 500;
+        color: #0f172a;
+        font-size: 0.85rem;
+    }
+    .compact-type {
+        font-size: 0.75rem;
+        color: #64748b;
+        background: #f1f5f9;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-weight: 500;
+    }
+    .compact-price {
+        font-weight: 600;
+        color: #3B6FE8;
+        font-size: 0.85rem;
+    }
+    .compact-location {
+        font-size: 0.8rem;
+        color: #64748b;
+    }
+    .compact-action-btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+</style>
+{% endblock %}

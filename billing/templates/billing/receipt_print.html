@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt {{ payment.receipt_number }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        @media print {
+            @page { size: A4; margin: 15mm; }
+            body { background: white; }
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: white;
+            padding: 20px;
+        }
+        .receipt-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 25px;
+        }
+        .company-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #333;
+        }
+        .company-info h1 {
+            color: #333;
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+        .company-tagline {
+            color: #666;
+            font-style: italic;
+            font-size: 0.8rem;
+        }
+        .contact-info {
+            text-align: right;
+            font-size: 0.75rem;
+            color: #333;
+        }
+        .contact-info i {
+            color: #666;
+            margin-right: 5px;
+        }
+        .document-title-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+        }
+        .document-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #000;
+            text-transform: uppercase;
+        }
+        .receipt-number-box {
+            text-align: right;
+        }
+        .receipt-label {
+            font-size: 0.75rem;
+            color: #666;
+            margin-bottom: 3px;
+        }
+        .receipt-number {
+            border: 1px solid #333;
+            color: #333;
+            padding: 6px 15px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        .payment-date {
+            font-size: 0.8rem;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .section-title {
+            color: #333;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+        .tenant-info {
+            margin-bottom: 20px;
+        }
+        .tenant-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #000;
+            margin-bottom: 8px;
+        }
+        .tenant-details {
+            font-size: 0.8rem;
+            color: #333;
+            line-height: 1.6;
+        }
+        .payment-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            font-size: 0.8rem;
+        }
+        .payment-table thead {
+            background: #f5f5f5;
+            border-bottom: 2px solid #333;
+        }
+        .payment-table th {
+            padding: 8px 10px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-align: left;
+        }
+        .payment-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #dee2e6;
+            font-size: 0.8rem;
+        }
+        .payment-table th:last-child,
+        .payment-table td:last-child {
+            text-align: right;
+        }
+        .total-row {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 8px;
+        }
+        .total-box {
+            border: 2px solid #333;
+            padding: 8px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: 600;
+        }
+        .total-label {
+            font-size: 0.8rem;
+        }
+        .total-amount {
+            font-size: 1rem;
+        }
+        .signatures {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 50px;
+            padding-top: 20px;
+        }
+        .signature-line {
+            width: 45%;
+            text-align: center;
+        }
+        .signature-line .line {
+            border-top: 1px solid #000;
+            margin-bottom: 5px;
+        }
+        .signature-label {
+            font-size: 0.75rem;
+            color: #333;
+        }
+        .footer {
+            margin-top: 40px;
+            padding-top: 15px;
+            border-top: 1px solid #333;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #333;
+        }
+        .print-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: #0d6efd;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .print-btn:hover {
+            background: #0b5ed7;
+        }
+        @media print {
+            body { padding: 0; }
+            .receipt-container { box-shadow: none; padding: 0; }
+            .print-btn { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <button class="print-btn no-print" onclick="window.print()">
+        <i class="bi bi-printer me-2"></i>Print Receipt
+    </button>
+
+    <div class="receipt-container">
+        <!-- Company Header -->
+        <div class="company-header">
+            <div class="company-info">
+                <h1>Property Rent</h1>
+                <div class="company-tagline">"Your Partner in Property Management & Rentals."</div>
+            </div>
+            <div class="contact-info">
+                <div><i class="bi bi-geo-alt"></i> Kampala, Uganda</div>
+                <div><i class="bi bi-telephone"></i> +256 XXX XXX XXX</div>
+                <div><i class="bi bi-envelope"></i> info@propertyrentals.com</div>
+            </div>
+        </div>
+
+        <!-- Document Title & Receipt Number -->
+        <div class="document-title-section">
+            <div>
+                <div class="document-title">Payment Receipt</div>
+                <div class="payment-date">Payment Date: {{ payment.payment_date|date:"F d, Y" }}</div>
+            </div>
+            <div class="receipt-number-box">
+                <div class="receipt-label">RECEIPT NO</div>
+                <div class="receipt-number">{{ payment.receipt_number }}</div>
+            </div>
+        </div>
+
+        <!-- Tenant Information -->
+        <div class="tenant-info">
+            <div class="section-title">Tenant Information</div>
+            <div class="tenant-name">{{ payment.invoice.rental.tenant.name }}</div>
+            <div class="tenant-details">
+                <div><strong>Tenant ID:</strong> {{ payment.invoice.rental.tenant.pk|upper|slice:":8" }}</div>
+                <div><strong>Phone:</strong> {{ payment.invoice.rental.tenant.phone|default:"N/A" }}</div>
+                <div><strong>Email:</strong> {{ payment.invoice.rental.tenant.email|default:"N/A" }}</div>
+                <div><strong>Property:</strong> {{ payment.invoice.rental.property_obj.name }}</div>
+            </div>
+        </div>
+
+        <!-- Payment Summary -->
+        <div class="section-title">Payment Summary</div>
+        <table class="payment-table">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Date</th>
+                    <th>Method</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        Payment Receipt {{ payment.receipt_number }}<br>
+                        <small class="text-muted">Invoice: {{ payment.invoice.invoice_number }}</small><br>
+                        <small class="text-muted">Period: {{ payment.invoice.period_start|date:"M d, Y" }} - {{ payment.invoice.period_end|date:"M d, Y" }}</small>
+                    </td>
+                    <td>{{ payment.payment_date|date:"M d, Y" }}</td>
+                    <td>{{ payment.get_payment_method_display }}</td>
+                    <td>{{ payment.currency }} {{ payment.amount|floatformat:0 }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Total -->
+        <div class="total-row">
+            <div class="total-box">
+                <span class="total-label">TOTAL PAID:</span>
+                <span class="total-amount">{{ payment.currency }} {{ payment.amount|floatformat:0 }}</span>
+            </div>
+        </div>
+
+        <!-- Signatures -->
+        <div class="signatures">
+            <div class="signature-line">
+                <div class="line"></div>
+                <div class="signature-label">Processed By: {{ request.user.get_full_name|default:request.user.email }}</div>
+            </div>
+            <div class="signature-line">
+                <div class="line"></div>
+                <div class="signature-label">Customer Signature</div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <strong>Landlord Contact:</strong> {{ payment.invoice.rental.property_obj.owner.phone|default:"N/A" }}<br>
+            <small>Thank you for your business</small>
+        </div>
+    </div>
+
+    <script>
+        window.onload = function() {
+            // Auto-print when page loads (optional - can be removed if not desired)
+            // setTimeout(() => window.print(), 500);
+        };
+    </script>
+</body>
+</html>

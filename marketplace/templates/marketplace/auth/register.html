@@ -1,0 +1,126 @@
+{% extends 'marketplace/base.html' %}
+{% block title %}Create Account — RoomFinder{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width:560px;">
+    <div class="text-center mb-4">
+        <a href="{% url 'marketplace:home' %}" class="text-decoration-none">
+            <span style="font-size:2rem;font-weight:800;color:#3B6FE8;">Room<span style="color:#1a1a2e;">Finder</span></span>
+        </a>
+        <h2 class="mt-3" style="font-size:1.5rem;font-weight:700;">Create your account</h2>
+        <p class="text-muted" style="font-size:0.92rem;">Find a room or list your spare room for free</p>
+    </div>
+
+    <div class="bg-white rounded-3 p-4 shadow-sm">
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger" style="font-size:0.88rem;">
+            {% for err in form.non_field_errors %}{{ err }}{% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+
+            <!-- Role selector -->
+            <div class="mb-4">
+                <label class="form-label fw-bold" style="font-size:0.9rem;">I am a…</label>
+                <div class="row g-3">
+                    <div class="col-6">
+                        <label class="role-card {% if form.role.value == 'seeker' %}selected{% endif %}" for="role_seeker">
+                            <input type="radio" name="role" id="role_seeker" value="seeker" class="d-none" {% if form.role.value != 'landlord' %}checked{% endif %}>
+                            <div class="role-icon"><i class="bi bi-search-heart"></i></div>
+                            <div class="role-label">Room Seeker</div>
+                            <div class="role-sub">Looking for a room to rent</div>
+                        </label>
+                    </div>
+                    <div class="col-6">
+                        <label class="role-card {% if form.role.value == 'landlord' %}selected{% endif %}" for="role_landlord">
+                            <input type="radio" name="role" id="role_landlord" value="landlord" class="d-none" {% if form.role.value == 'landlord' %}checked{% endif %}>
+                            <div class="role-icon"><i class="bi bi-house-door"></i></div>
+                            <div class="role-label">Landlord</div>
+                            <div class="role-sub">I have a room to let</div>
+                        </label>
+                    </div>
+                </div>
+                {% if form.role.errors %}<div class="text-danger mt-1" style="font-size:0.8rem;">{{ form.role.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-6">
+                    <label class="form-label fw-semibold" style="font-size:0.87rem;">First Name</label>
+                    <input type="text" name="first_name" class="form-control" placeholder="John" required value="{{ form.first_name.value|default:'' }}">
+                    {% if form.first_name.errors %}<div class="text-danger" style="font-size:0.8rem;">{{ form.first_name.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-6">
+                    <label class="form-label fw-semibold" style="font-size:0.87rem;">Last Name</label>
+                    <input type="text" name="last_name" class="form-control" placeholder="Smith" required value="{{ form.last_name.value|default:'' }}">
+                    {% if form.last_name.errors %}<div class="text-danger" style="font-size:0.8rem;">{{ form.last_name.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold" style="font-size:0.87rem;">Email Address</label>
+                <input type="email" name="email" class="form-control" placeholder="you@example.com" required value="{{ form.email.value|default:'' }}">
+                {% if form.email.errors %}<div class="text-danger" style="font-size:0.8rem;">{{ form.email.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-6">
+                    <label class="form-label fw-semibold" style="font-size:0.87rem;">Phone (optional)</label>
+                    <input type="text" name="phone" class="form-control" placeholder="+254 7xx xxx xxx" value="{{ form.phone.value|default:'' }}">
+                </div>
+                <div class="col-6">
+                    <label class="form-label fw-semibold" style="font-size:0.87rem;">City (optional)</label>
+                    <input type="text" name="city" class="form-control" placeholder="Nairobi" value="{{ form.city.value|default:'' }}">
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-6">
+                    <label class="form-label fw-semibold" style="font-size:0.87rem;">Password</label>
+                    <input type="password" name="password1" class="form-control" placeholder="Min. 8 characters" required>
+                    {% if form.password1.errors %}<div class="text-danger" style="font-size:0.8rem;">{{ form.password1.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-6">
+                    <label class="form-label fw-semibold" style="font-size:0.87rem;">Confirm Password</label>
+                    <input type="password" name="password2" class="form-control" placeholder="Repeat password" required>
+                    {% if form.password2.errors %}<div class="text-danger" style="font-size:0.8rem;">{{ form.password2.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+
+            <button type="submit" class="btn w-100 fw-bold py-2" style="background:#3B6FE8;color:#fff;border-radius:8px;">
+                <i class="bi bi-person-plus me-2"></i>Create Account
+            </button>
+        </form>
+
+        <hr class="my-3">
+        <p class="text-center text-muted mb-0" style="font-size:0.88rem;">
+            Already have an account?
+            <a href="{% url 'marketplace:login' %}" class="fw-semibold" style="color:#3B6FE8;">Sign in</a>
+        </p>
+    </div>
+</div>
+
+<style>
+.role-card {
+    display: block; border: 2px solid #e5e7eb; border-radius: 12px;
+    padding: 1.2rem 1rem; text-align: center; cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+}
+.role-card:hover { border-color: #3B6FE8; }
+.role-card.selected, input[type=radio]:checked + .role-card { border-color: #3B6FE8; background: #eff4fe; }
+.role-icon { font-size: 2rem; color: #3B6FE8; margin-bottom: 0.4rem; }
+.role-label { font-weight: 700; font-size: 0.95rem; }
+.role-sub { font-size: 0.78rem; color: #6b7280; margin-top: 2px; }
+</style>
+{% block extra_js %}
+<script>
+document.querySelectorAll('input[name="role"]').forEach(r => {
+    r.addEventListener('change', () => {
+        document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+        r.closest('label').classList.add('selected');
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

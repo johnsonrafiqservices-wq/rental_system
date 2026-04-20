@@ -1,0 +1,118 @@
+{% extends 'rentals/base.html' %}
+
+{% block title %}{{ expense.expense_number }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Main Info Card -->
+            <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center" style="border-radius: 12px 12px 0 0;">
+                    <div>
+                        <h5 class="mb-0 fw-bold" style="color: #0f172a;">{{ expense.expense_number }}</h5>
+                        <small class="text-muted">{{ expense.get_expense_type_display }}</small>
+                    </div>
+                    <span class="badge {% if expense.status == 'paid' %}bg-success{% elif expense.status == 'approved' %}bg-primary{% elif expense.status == 'draft' %}bg-secondary{% else %}bg-warning{% endif %} fs-6">
+                        {{ expense.get_status_display }}
+                    </span>
+                </div>
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3">{{ expense.description }}</h6>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label class="text-muted small d-block">Amount</label>
+                            <div class="fs-4 fw-bold text-primary">{{ expense.currency }} {{ expense.amount|floatformat:2 }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small d-block">Expense Date</label>
+                            <div class="fs-5">{{ expense.expense_date|date:"d M Y" }}</div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        {% if expense.budget_item %}
+                        <div class="col-md-6">
+                            <label class="text-muted small d-block">Budget Category</label>
+                            <div>{{ expense.budget_item.get_category_display }}</div>
+                            <small class="text-muted">{{ expense.budget_item.budget.name }}</small>
+                        </div>
+                        {% endif %}
+                        
+                        {% if expense.property_obj %}
+                        <div class="col-md-6">
+                            <label class="text-muted small d-block">Property</label>
+                            <div>{{ expense.property_obj.name }}</div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if expense.rental %}
+                        <div class="col-md-6">
+                            <label class="text-muted small d-block">Rental</label>
+                            <div>{{ expense.rental.rental_number }}</div>
+                            <small class="text-muted">{{ expense.rental.tenant.name }}</small>
+                        </div>
+                        {% endif %}
+                        
+                        {% if expense.vendor_name %}
+                        <div class="col-md-6">
+                            <label class="text-muted small d-block">Vendor</label>
+                            <div>{{ expense.vendor_name }}</div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if expense.invoice_number %}
+                        <div class="col-md-6">
+                            <label class="text-muted small d-block">Vendor Invoice</label>
+                            <div>{{ expense.invoice_number }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {% if expense.notes %}
+                    <div class="mt-4">
+                        <label class="text-muted small d-block">Notes</label>
+                        <p class="mb-0">{{ expense.notes|linebreaks }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Actions Card -->
+            <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
+                <div class="card-header bg-white py-3" style="border-radius: 12px 12px 0 0;">
+                    <h6 class="mb-0 fw-bold">Actions</h6>
+                </div>
+                <div class="card-body">
+                    <a href="{% url 'billing:expense_edit' expense.pk %}" class="btn btn-outline-primary w-100 mb-2">
+                        <i class="bi bi-pencil me-2"></i>Edit Expense
+                    </a>
+                    <form method="post" action="{% url 'billing:expense_delete' expense.pk %}" onsubmit="return confirm('Are you sure you want to delete this expense?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-danger w-100">
+                            <i class="bi bi-trash me-2"></i>Delete Expense
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Receipt Card -->
+            {% if expense.receipt_file %}
+            <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+                <div class="card-header bg-white py-3" style="border-radius: 12px 12px 0 0;">
+                    <h6 class="mb-0 fw-bold">Receipt</h6>
+                </div>
+                <div class="card-body text-center">
+                    <a href="{{ expense.receipt_file.url }}" target="_blank" class="btn btn-primary">
+                        <i class="bi bi-file-earmark me-2"></i>View Receipt
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

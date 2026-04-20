@@ -1,0 +1,346 @@
+{% extends 'rentals/base.html' %}
+
+{% block title %}Billing Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-pills mb-4" style="font-size: 0.85rem;">
+        <li class="nav-item">
+            <a class="nav-link active" href="{% url 'billing:billing_dashboard' %}"><i class="bi bi-grid me-1"></i>Dashboard</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'billing:invoice_list' %}"><i class="bi bi-receipt me-1"></i>Invoices</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'billing:payment_list' %}"><i class="bi bi-cash-stack me-1"></i>Payments</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'billing:budget_list' %}"><i class="bi bi-wallet2 me-1"></i>Budgets</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'billing:expense_list' %}"><i class="bi bi-cash-coin me-1"></i>Expenses</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'billing:financial_report' %}"><i class="bi bi-graph-up me-1"></i>Reports</a>
+        </li>
+    </ul>
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1 fw-bold" style="color: #0f172a; font-size: 1.5rem;">
+                <i class="bi bi-receipt-cutoff me-2 text-primary"></i>Billing Dashboard
+            </h2>
+            <p class="text-muted mb-0" style="font-size: 0.85rem;">Manage invoices and payments</p>
+        </div>
+        <a href="{% url 'billing:invoice_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-2"></i>New Invoice
+        </a>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+                <div class="card-body text-center py-3">
+                    <div class="mb-2" style="color: #3B6FE8;">
+                        <i class="bi bi-receipt" style="font-size: 1.5rem;"></i>
+                    </div>
+                    <h5 class="fw-bold mb-1" style="color: #0f172a;">{{ total_invoices }}</h5>
+                    <small class="text-muted" style="font-size: 0.75rem;">Total Invoices</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+                <div class="card-body text-center py-3">
+                    <div class="mb-2" style="color: #3B6FE8;">
+                        <i class="bi bi-graph-up-arrow" style="font-size: 1.5rem;"></i>
+                    </div>
+                    <h5 class="fw-bold mb-1" style="color: #0f172a;">{{ monthly_revenue|floatformat:0 }}</h5>
+                    <small class="text-muted" style="font-size: 0.75rem;">Revenue (This Month)</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+                <div class="card-body text-center py-3">
+                    <div class="mb-2" style="color: #3B6FE8;">
+                        <i class="bi bi-hourglass-split" style="font-size: 1.5rem;"></i>
+                    </div>
+                    <h5 class="fw-bold mb-1" style="color: #0f172a;">{{ pending_amount }}</h5>
+                    <small class="text-muted" style="font-size: 0.75rem;">Unpaid</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+                <div class="card-body text-center py-3">
+                    <div class="mb-2" style="color: #ef4444;">
+                        <i class="bi bi-exclamation-triangle" style="font-size: 1.5rem;"></i>
+                    </div>
+                    <h5 class="fw-bold mb-1" style="color: #0f172a;">{{ overdue_invoices }}</h5>
+                    <small class="text-muted" style="font-size: 0.75rem;">Overdue</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="row g-4">
+        <!-- Recent Invoices -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 12px; overflow: hidden;">
+                <div class="card-header border-bottom d-flex justify-content-between align-items-center py-3" style="border-radius: 12px 12px 0 0; background: #f8fafc;">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-receipt me-2" style="color: #3B6FE8;"></i>
+                        <span class="fw-semibold" style="color: #0f172a; font-size: 0.9rem;">Recent Invoices</span>
+                    </div>
+                    <a href="{% url 'billing:invoice_list' %}" class="text-decoration-none" style="color: #3B6FE8; font-size: 0.8rem; font-weight: 500;">View All</a>
+                </div>
+                <div class="card-body p-0">
+                    {% if recent_invoices %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 compact-table">
+                            <thead>
+                                <tr>
+                                    <th class="ps-3">Invoice #</th>
+                                    <th>Property</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th class="pe-3 text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for inv in recent_invoices %}
+                                <tr class="compact-row">
+                                    <td class="ps-3">
+                                        <a href="{% url 'billing:invoice_detail' inv.pk %}" class="compact-title">{{ inv.invoice_number }}</a>
+                                    </td>
+                                    <td><span class="compact-type">{{ inv.rental.property_obj.name|truncatechars:25 }}</span></td>
+                                    <td class="compact-price">{{ inv.currency }} {{ inv.total_amount|floatformat:0 }}</td>
+                                    <td>
+                                        <span class="compact-status {% if inv.status == 'paid' %}active{% elif inv.status == 'overdue' %}overdue{% elif inv.status == 'partially_paid' %}partial{% elif inv.status == 'sent' %}sent{% else %}inactive{% endif %}">
+                                            <i class="bi bi-circle-fill"></i>{{ inv.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td class="pe-3 text-end">
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-light dropdown-toggle compact-action-btn" type="button" data-bs-toggle="dropdown">
+                                                <i class="bi bi-three-dots-vertical"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end">
+                                                <li><a class="dropdown-item" href="{% url 'billing:invoice_detail' inv.pk %}"><i class="bi bi-eye me-2"></i>View</a></li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-receipt" style="font-size: 2rem; color: #cbd5e1;"></i>
+                        <p class="text-muted mt-2 mb-0" style="font-size: 0.8rem;">No invoices yet</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Payments -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px; overflow: hidden;">
+                <div class="card-header border-bottom d-flex justify-content-between align-items-center py-3" style="border-radius: 12px 12px 0 0; background: #f8fafc;">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-cash-stack me-2" style="color: #3B6FE8;"></i>
+                        <span class="fw-semibold" style="color: #0f172a; font-size: 0.9rem;">Recent Payments</span>
+                    </div>
+                    <a href="{% url 'billing:payment_list' %}" class="text-decoration-none" style="color: #3B6FE8; font-size: 0.8rem; font-weight: 500;">View All</a>
+                </div>
+                <div class="card-body p-0">
+                    {% if recent_payments %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 compact-table">
+                            <thead>
+                                <tr>
+                                    <th class="ps-3">Receipt</th>
+                                    <th>Amount</th>
+                                    <th class="pe-3 text-end">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in recent_payments %}
+                                <tr class="compact-row">
+                                    <td class="ps-3">
+                                        <a href="{% url 'billing:payment_detail' p.pk %}" class="compact-title">{{ p.receipt_number }}</a>
+                                    </td>
+                                    <td class="compact-price" style="color: #10b981;">{{ p.currency }} {{ p.amount|floatformat:0 }}</td>
+                                    <td class="pe-3 text-end compact-views">{{ p.payment_date|date:"d M" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-cash-stack" style="font-size: 2rem; color: #cbd5e1;"></i>
+                        <p class="text-muted mt-2 mb-0" style="font-size: 0.8rem;">No payments recorded</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Upcoming Due -->
+            {% if upcoming_due %}
+            <div class="card border-0 shadow-sm" style="border-radius: 12px; overflow: hidden;">
+                <div class="card-header border-bottom d-flex justify-content-between align-items-center py-3" style="border-radius: 12px 12px 0 0; background: #f8fafc;">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-alarm me-2" style="color: #3B6FE8;"></i>
+                        <span class="fw-semibold" style="color: #0f172a; font-size: 0.9rem;">Due This Week</span>
+                    </div>
+                    <span class="badge bg-warning text-dark" style="font-size: 0.65rem;">{{ upcoming_due|length }}</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 compact-table">
+                            <thead>
+                                <tr>
+                                    <th class="ps-3">Invoice</th>
+                                    <th class="pe-3 text-end">Due</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for inv in upcoming_due %}
+                                <tr class="compact-row">
+                                    <td class="ps-3">
+                                        <a href="{% url 'billing:invoice_detail' inv.pk %}" class="compact-title">{{ inv.invoice_number }}</a>
+                                        <div class="compact-location">{{ inv.rental.tenant.name|truncatechars:15 }}</div>
+                                    </td>
+                                    <td class="pe-3 text-end">
+                                        <div class="compact-price" style="color: #ef4444;">{{ inv.currency }} {{ inv.balance_due|floatformat:0 }}</div>
+                                        <div class="compact-views" style="color: #ef4444;">{{ inv.due_date|date:"d M" }}</div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .compact-table {
+        font-size: 0.85rem;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    .compact-table thead th {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 0.75rem 0.5rem;
+        border-bottom: 1px solid #e2e8f0;
+        background: #f8fafc;
+        white-space: nowrap;
+    }
+    .compact-table tbody tr {
+        border-bottom: 1px solid #f1f5f9;
+        transition: background-color 0.15s;
+    }
+    .compact-table tbody tr:hover {
+        background-color: #f8fafc;
+    }
+    .compact-table tbody td {
+        padding: 0.6rem 0.5rem;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+    .compact-title {
+        font-weight: 500;
+        color: #0f172a;
+        text-decoration: none;
+        font-size: 0.85rem;
+    }
+    .compact-title:hover {
+        color: #3B6FE8;
+    }
+    .compact-type {
+        font-size: 0.75rem;
+        color: #64748b;
+        background: #f1f5f9;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-weight: 500;
+    }
+    .compact-location {
+        font-size: 0.8rem;
+        color: #64748b;
+    }
+    .compact-price {
+        font-weight: 600;
+        color: #3B6FE8;
+        font-size: 0.85rem;
+    }
+    .compact-views {
+        font-size: 0.8rem;
+        color: #94a3b8;
+    }
+    .compact-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        padding: 2px 8px;
+        border-radius: 12px;
+        background: #f1f5f9;
+        color: #64748b;
+    }
+    .compact-status i {
+        font-size: 0.5rem;
+    }
+    .compact-status.active {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+    .compact-status.overdue {
+        background: #fee2e2;
+        color: #ef4444;
+    }
+    .compact-status.partial {
+        background: #fef3c7;
+        color: #f59e0b;
+    }
+    .compact-status.sent {
+        background: #dbeafe;
+        color: #3B6FE8;
+    }
+    .compact-status.inactive {
+        background: #f1f5f9;
+        color: #64748b;
+    }
+    .compact-action-btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+        color: #64748b;
+        background: transparent;
+        border: none;
+    }
+    .compact-action-btn:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+    }
+    .compact-action-btn::after {
+        display: none;
+    }
+</style>
+{% endblock %}

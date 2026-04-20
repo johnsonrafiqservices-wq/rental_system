@@ -1,0 +1,225 @@
+{% extends 'rentals/base.html' %}
+
+{% block title %}Invoices{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0 fw-800" style="color: #0f172a;"><i class="bi bi-receipt me-2"></i>Invoices</h4>
+    <a href="{% url 'billing:invoice_create' %}" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-circle me-1"></i>New Invoice
+    </a>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4 border-0 shadow-sm" style="border-radius: 12px;">
+    <div class="card-body py-2">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-5">
+                <input type="text" name="search" class="form-control form-control-sm border-0" style="background: #f1f5f9; border-radius: 8px;" placeholder="Search invoice #, property, tenant..." value="{{ search }}">
+            </div>
+            <div class="col-md-3">
+                <select name="status" class="form-select form-select-sm border-0" style="background: #f1f5f9; border-radius: 8px;">
+                    <option value="">All Statuses</option>
+                    <option value="draft" {% if status == 'draft' %}selected{% endif %}>Draft</option>
+                    <option value="sent" {% if status == 'sent' %}selected{% endif %}>Sent</option>
+                    <option value="paid" {% if status == 'paid' %}selected{% endif %}>Paid</option>
+                    <option value="partially_paid" {% if status == 'partially_paid' %}selected{% endif %}>Partially Paid</option>
+                    <option value="overdue" {% if status == 'overdue' %}selected{% endif %}>Overdue</option>
+                    <option value="cancelled" {% if status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-sm btn-primary w-100" style="border-radius: 8px;"><i class="bi bi-search me-1"></i>Filter</button>
+            </div>
+            <div class="col-md-2">
+                <a href="{% url 'billing:invoice_list' %}" class="btn btn-sm btn-outline-secondary w-100" style="border-radius: 8px;">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Table -->
+<div class="card border-0 shadow-sm" style="border-radius: 12px; overflow: hidden;">
+    <div class="card-body p-0">
+        {% if page_obj.object_list %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 compact-table">
+                <thead>
+                    <tr>
+                        <th class="ps-3">Invoice #</th>
+                        <th>Property</th>
+                        <th>Tenant</th>
+                        <th>Amount</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                        <th class="pe-3 text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for inv in page_obj %}
+                    <tr class="compact-row">
+                        <td class="ps-3">
+                            <a href="{% url 'billing:invoice_detail' inv.pk %}" class="compact-title">{{ inv.invoice_number }}</a>
+                        </td>
+                        <td><span class="compact-type">{{ inv.rental.property_obj.name|truncatechars:25 }}</span></td>
+                        <td class="compact-location">{{ inv.rental.tenant.name|truncatechars:20 }}</td>
+                        <td class="compact-price">{{ inv.currency }} {{ inv.total_amount|floatformat:0 }}</td>
+                        <td class="compact-views">{{ inv.due_date|date:"d M Y" }}</td>
+                        <td>
+                            <span class="compact-status {% if inv.status == 'paid' %}active{% elif inv.status == 'overdue' %}overdue{% elif inv.status == 'partially_paid' %}partial{% elif inv.status == 'sent' %}sent{% else %}inactive{% endif %}">
+                                <i class="bi bi-circle-fill"></i>{{ inv.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="pe-3 text-end">
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light dropdown-toggle compact-action-btn" type="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="{% url 'billing:invoice_detail' inv.pk %}"><i class="bi bi-eye me-2"></i>View</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="{% url 'billing:payment_create' %}?invoice={{ inv.pk }}"><i class="bi bi-cash me-2"></i>Record Payment</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-receipt" style="font-size:3rem;color:#cbd5e1;"></i>
+            <p class="text-muted mt-2">No invoices found.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if page_obj.has_other_pages %}
+<nav class="mt-3">
+    <ul class="pagination pagination-sm justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ search }}&status={{ status }}">&laquo;</a></li>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+            <a class="page-link" href="?page={{ num }}&search={{ search }}&status={{ status }}">{{ num }}</a>
+        </li>
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ search }}&status={{ status }}">&raquo;</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+<style>
+    .compact-table {
+        font-size: 0.85rem;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    .compact-table thead th {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 0.75rem 0.5rem;
+        border-bottom: 1px solid #e2e8f0;
+        background: #f8fafc;
+        white-space: nowrap;
+    }
+    .compact-table tbody tr {
+        border-bottom: 1px solid #f1f5f9;
+        transition: background-color 0.15s;
+    }
+    .compact-table tbody tr:hover {
+        background-color: #f8fafc;
+    }
+    .compact-table tbody td {
+        padding: 0.6rem 0.5rem;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+    .compact-title {
+        font-weight: 500;
+        color: #0f172a;
+        text-decoration: none;
+        font-size: 0.85rem;
+    }
+    .compact-title:hover {
+        color: #3B6FE8;
+    }
+    .compact-type {
+        font-size: 0.75rem;
+        color: #64748b;
+        background: #f1f5f9;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-weight: 500;
+    }
+    .compact-location {
+        font-size: 0.8rem;
+        color: #64748b;
+    }
+    .compact-price {
+        font-weight: 600;
+        color: #3B6FE8;
+        font-size: 0.85rem;
+    }
+    .compact-views {
+        font-size: 0.8rem;
+        color: #94a3b8;
+    }
+    .compact-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        padding: 2px 8px;
+        border-radius: 12px;
+        background: #f1f5f9;
+        color: #64748b;
+    }
+    .compact-status i {
+        font-size: 0.5rem;
+    }
+    .compact-status.active {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+    .compact-status.overdue {
+        background: #fee2e2;
+        color: #ef4444;
+    }
+    .compact-status.partial {
+        background: #fef3c7;
+        color: #f59e0b;
+    }
+    .compact-status.sent {
+        background: #dbeafe;
+        color: #3B6FE8;
+    }
+    .compact-status.inactive {
+        background: #f1f5f9;
+        color: #64748b;
+    }
+    .compact-action-btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+        color: #64748b;
+        background: transparent;
+        border: none;
+    }
+    .compact-action-btn:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+    }
+    .compact-action-btn::after {
+        display: none;
+    }
+</style>
+{% endblock %}

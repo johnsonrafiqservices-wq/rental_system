@@ -1,0 +1,230 @@
+{% extends 'rentals/base.html' %}
+
+{% block title %}Budgets{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0 fw-800" style="color: #0f172a;"><i class="bi bi-wallet2 me-2"></i>Budgets</h4>
+    <a href="{% url 'billing:budget_create' %}" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-circle me-1"></i>Create Budget
+    </a>
+</div>
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+            <div class="card-body text-center py-3">
+                <div style="font-size:1.5rem;font-weight:800;color:#3B6FE8;">{{ budgets|length }}</div>
+                <div style="font-size:0.78rem;color:#6b7280;">Total Budgets</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+            <div class="card-body text-center py-3">
+                <div style="font-size:1.5rem;font-weight:800;color:#10b981;">
+                    {% with total=0 %}
+                        {% for b in budgets %}
+                            {% if b.status == 'active' %}
+                                {{ b.total_budgeted|floatformat:0 }}
+                            {% endif %}
+                        {% endfor %}
+                    {% endwith %}
+                    {% if active_budget %}{{ active_budget.total_budgeted|floatformat:0 }}{% else %}0{% endif %}
+                </div>
+                <div style="font-size:0.78rem;color:#6b7280;">Active Budget</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+            <div class="card-body text-center py-3">
+                <div style="font-size:1.5rem;font-weight:800;color:#f59e0b;">
+                    {% if active_budget %}{{ active_budget.total_spent|floatformat:0 }}{% else %}0{% endif %}
+                </div>
+                <div style="font-size:0.78rem;color:#6b7280;">Spent</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+            <div class="card-body text-center py-3">
+                <div style="font-size:1.5rem;font-weight:800;color:#64748b;">
+                    {% if active_budget %}{{ active_budget.remaining|floatformat:0 }}{% else %}0{% endif %}
+                </div>
+                <div style="font-size:0.78rem;color:#6b7280;">Remaining</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Budgets Table -->
+<div class="card border-0 shadow-sm" style="border-radius: 12px; overflow: hidden;">
+    <div class="card-body p-0">
+        {% if budgets %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 compact-table">
+                <thead>
+                    <tr>
+                        <th class="ps-3">Budget Name</th>
+                        <th>Period</th>
+                        <th>Dates</th>
+                        <th>Budgeted</th>
+                        <th>Spent</th>
+                        <th>Utilization</th>
+                        <th>Status</th>
+                        <th class="pe-3 text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for budget in budgets %}
+                    <tr class="compact-row">
+                        <td class="ps-3">
+                            <a href="{% url 'billing:budget_detail' budget.pk %}" class="compact-title">{{ budget.name }}</a>
+                        </td>
+                        <td><span class="compact-type">{{ budget.get_period_type_display }}</span></td>
+                        <td class="compact-views">{{ budget.start_date|date:"d M Y" }} - {{ budget.end_date|date:"d M Y" }}</td>
+                        <td class="compact-price">{{ budget.currency }} {{ budget.total_budgeted|floatformat:0 }}</td>
+                        <td class="compact-location">{{ budget.currency }} {{ budget.total_spent|floatformat:0 }}</td>
+                        <td>
+                            <div class="progress" style="height: 6px; width: 80px;">
+                                <div class="progress-bar {% if budget.utilization_percentage > 90 %}bg-danger{% elif budget.utilization_percentage > 70 %}bg-warning{% else %}bg-success{% endif %}" 
+                                     role="progressbar" 
+                                     style="width: {{ budget.utilization_percentage }}%"></div>
+                            </div>
+                            <small class="text-muted" style="font-size: 0.7rem;">{{ budget.utilization_percentage }}%</small>
+                        </td>
+                        <td>
+                            <span class="compact-status {% if budget.status == 'active' %}active{% elif budget.status == 'draft' %}pending{% else %}inactive{% endif %}">
+                                <i class="bi bi-circle-fill"></i>{{ budget.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="pe-3 text-end">
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light dropdown-toggle compact-action-btn" type="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="{% url 'billing:budget_detail' budget.pk %}"><i class="bi bi-eye me-2"></i>View</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'billing:budget_edit' budget.pk %}"><i class="bi bi-pencil me-2"></i>Edit</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="{% url 'billing:budget_item_create' budget.pk %}"><i class="bi bi-plus-circle me-2"></i>Add Item</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-wallet2" style="font-size:3rem;color:#cbd5e1;"></i>
+            <p class="text-muted mt-2">No budgets found. Create your first budget to start tracking expenses.</p>
+            <a href="{% url 'billing:budget_create' %}" class="btn btn-primary btn-sm">Create Budget</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .compact-table {
+        font-size: 0.85rem;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    .compact-table thead th {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 0.75rem 0.5rem;
+        border-bottom: 1px solid #e2e8f0;
+        background: #f8fafc;
+        white-space: nowrap;
+    }
+    .compact-table tbody tr {
+        border-bottom: 1px solid #f1f5f9;
+        transition: background-color 0.15s;
+    }
+    .compact-table tbody tr:hover {
+        background-color: #f8fafc;
+    }
+    .compact-table tbody td {
+        padding: 0.6rem 0.5rem;
+        vertical-align: middle;
+    }
+    .compact-title {
+        font-weight: 500;
+        color: #0f172a;
+        text-decoration: none;
+        font-size: 0.85rem;
+    }
+    .compact-title:hover {
+        color: #3B6FE8;
+    }
+    .compact-type {
+        font-size: 0.75rem;
+        color: #64748b;
+        background: #f1f5f9;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-weight: 500;
+    }
+    .compact-location {
+        font-size: 0.8rem;
+        color: #64748b;
+    }
+    .compact-price {
+        font-weight: 600;
+        color: #3B6FE8;
+        font-size: 0.85rem;
+    }
+    .compact-views {
+        font-size: 0.8rem;
+        color: #94a3b8;
+    }
+    .compact-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        padding: 2px 8px;
+        border-radius: 12px;
+        background: #f1f5f9;
+        color: #64748b;
+    }
+    .compact-status i {
+        font-size: 0.5rem;
+    }
+    .compact-status.active {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+    .compact-status.pending {
+        background: #fef3c7;
+        color: #f59e0b;
+    }
+    .compact-status.inactive {
+        background: #f1f5f9;
+        color: #64748b;
+    }
+    .compact-action-btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+        color: #64748b;
+        background: transparent;
+        border: none;
+    }
+    .compact-action-btn:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+    }
+    .compact-action-btn::after {
+        display: none;
+    }
+</style>
+{% endblock %}

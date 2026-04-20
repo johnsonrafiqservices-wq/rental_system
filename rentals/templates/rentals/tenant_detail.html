@@ -1,0 +1,275 @@
+{% extends 'rentals/base.html' %}
+
+{% block title %}{{ tenant.name }} - Tenant Detail{% endblock %}
+
+{% block content %}
+<!-- Profile Header Card -->
+<div class="profile-header">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+        <div class="d-flex align-items-start gap-3">
+            <div class="profile-avatar" style="background:{% if tenant.tenant_type == 'company' %}#dbeafe{% else %}#ede9fe{% endif %};">
+                <i class="bi {% if tenant.tenant_type == 'company' %}bi-building{% else %}bi-person{% endif %}" style="color:{% if tenant.tenant_type == 'company' %}#2563eb{% else %}#7c3aed{% endif %};"></i>
+            </div>
+            <div>
+                <h4 class="mb-1">{{ tenant.name }}</h4>
+                <div class="d-flex flex-wrap gap-2 align-items-center" style="font-size:0.85rem;color:#64748b;">
+                    <span class="badge {% if tenant.tenant_type == 'company' %}bg-primary{% else %}bg-info{% endif %}">{{ tenant.get_tenant_type_display }}</span>
+                    {% if tenant.city %}<span><i class="bi bi-geo-alt me-1"></i>{{ tenant.city }}{% if tenant.country %}, {{ tenant.country }}{% endif %}</span>{% endif %}
+                    <span><i class="bi bi-file-earmark-text me-1"></i>{{ tenant.rental_count }} rental{{ tenant.rental_count|pluralize }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="profile-actions mt-3 d-flex flex-wrap gap-2">
+        <a href="{% url 'rentals:tenant_list' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Back to Tenants
+        </a>
+    </div>
+</div>
+
+<!-- Tab Navigation -->
+<ul class="nav nav-tabs-custom nav-tabs" id="tenantTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button">
+            <i class="bi bi-grid"></i>Overview
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="rentals-tab" data-bs-toggle="tab" data-bs-target="#rentalsinfo" type="button">
+            <i class="bi bi-file-earmark-text"></i>Rentals
+            <span class="badge bg-secondary ms-1" style="font-size:0.7rem;">{{ tenant_rentals|length }}</span>
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="payments-tab" data-bs-toggle="tab" data-bs-target="#paymentsinfo" type="button">
+            <i class="bi bi-credit-card"></i>Payments
+            <span class="badge bg-secondary ms-1" style="font-size:0.7rem;">{{ payments|length }}</span>
+        </button>
+    </li>
+    {% if tenant.qr_code_image %}
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="qr-tab" data-bs-toggle="tab" data-bs-target="#qrinfo" type="button">
+            <i class="bi bi-qr-code"></i>QR Code
+        </button>
+    </li>
+    {% endif %}
+</ul>
+
+<!-- Tab Content -->
+<div class="tab-content" id="tenantTabsContent">
+
+    <!-- Overview Tab -->
+    <div class="tab-pane fade show active" id="overview" role="tabpanel">
+        <div class="tab-section" style="padding: 1rem;">
+            <div class="tab-section-header" style="margin-bottom: 0.75rem; padding-bottom: 0.5rem;">
+                <h6 class="mb-0" style="font-size: 0.85rem; color: #3B6FE8; text-transform: uppercase; letter-spacing: 0.05em;">Tenant Information</h6>
+            </div>
+            {% if tenant.tenant_type == 'company' %}
+            <div class="sub-section" style="margin-bottom: 1rem;">
+                <div class="sub-section-title" style="font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; font-weight: 600;">Company Details</div>
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        <div class="detail-info" style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                            <i class="bi bi-building" style="color: #3B6FE8; font-size: 0.9rem; margin-top: 0.1rem;"></i>
+                            <div><div class="d-val" style="font-size: 0.85rem; color: #0f172a; font-weight: 500;">{{ tenant.company_name|default:"-" }}</div><div class="d-lbl" style="font-size: 0.7rem; color: #94a3b8;">Company Name</div></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="detail-info" style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                            <i class="bi bi-card-text" style="color: #3B6FE8; font-size: 0.9rem; margin-top: 0.1rem;"></i>
+                            <div><div class="d-val" style="font-size: 0.85rem; color: #0f172a; font-weight: 500;">{{ tenant.registration_number|default:"-" }}</div><div class="d-lbl" style="font-size: 0.7rem; color: #94a3b8;">Registration Number</div></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="detail-info" style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                            <i class="bi bi-receipt" style="color: #3B6FE8; font-size: 0.9rem; margin-top: 0.1rem;"></i>
+                            <div><div class="d-val" style="font-size: 0.85rem; color: #0f172a; font-weight: 500;">{{ tenant.tax_id|default:"-" }}</div><div class="d-lbl" style="font-size: 0.7rem; color: #94a3b8;">Tax ID</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="sub-section" style="margin-bottom: 1rem;">
+                <div class="sub-section-title" style="font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; font-weight: 600;">Personal Details</div>
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        <div class="detail-info" style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                            <i class="bi bi-person" style="color: #3B6FE8; font-size: 0.9rem; margin-top: 0.1rem;"></i>
+                            <div><div class="d-val" style="font-size: 0.85rem; color: #0f172a; font-weight: 500;">{{ tenant.first_name|default:"-" }}</div><div class="d-lbl" style="font-size: 0.7rem; color: #94a3b8;">First Name</div></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="detail-info" style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                            <i class="bi bi-person" style="color: #3B6FE8; font-size: 0.9rem; margin-top: 0.1rem;"></i>
+                            <div><div class="d-val" style="font-size: 0.85rem; color: #0f172a; font-weight: 500;">{{ tenant.last_name|default:"-" }}</div><div class="d-lbl" style="font-size: 0.7rem; color: #94a3b8;">Last Name</div></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="detail-info" style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                            <i class="bi bi-card-text" style="color: #3B6FE8; font-size: 0.9rem; margin-top: 0.1rem;"></i>
+                            <div><div class="d-val" style="font-size: 0.85rem; color: #0f172a; font-weight: 500;">{{ tenant.national_id|default:"-" }}</div><div class="d-lbl" style="font-size: 0.7rem; color: #94a3b8;">National ID</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            <div class="sub-section">
+                <div class="sub-section-title" style="font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; font-weight: 600;">Contact Information</div>
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        <div class="detail-info" style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                            <i class="bi bi-envelope" style="color: #3B6FE8; font-size: 0.9rem; margin-top: 0.1rem;"></i>
+                            <div><div class="d-val" style="font-size: 0.85rem; color: #0f172a; font-weight: 500;">{{ tenant.email|default:"-" }}</div><div class="d-lbl" style="font-size: 0.7rem; color: #94a3b8;">Email</div></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="detail-info" style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                            <i class="bi bi-telephone" style="color: #3B6FE8; font-size: 0.9rem; margin-top: 0.1rem;"></i>
+                            <div><div class="d-val" style="font-size: 0.85rem; color: #0f172a; font-weight: 500;">{{ tenant.phone|default:"-" }}</div><div class="d-lbl" style="font-size: 0.7rem; color: #94a3b8;">Phone</div></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="detail-info" style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                            <i class="bi bi-geo-alt" style="color: #3B6FE8; font-size: 0.9rem; margin-top: 0.1rem;"></i>
+                            <div><div class="d-val" style="font-size: 0.85rem; color: #0f172a; font-weight: 500;">{{ tenant.address|default:"Not provided" }}</div><div class="d-lbl" style="font-size: 0.7rem; color: #94a3b8;">Address</div></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="detail-info" style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                            <i class="bi bi-pin-map" style="color: #3B6FE8; font-size: 0.9rem; margin-top: 0.1rem;"></i>
+                            <div><div class="d-val" style="font-size: 0.85rem; color: #0f172a; font-weight: 500;">{{ tenant.city|default:"-" }}</div><div class="d-lbl" style="font-size: 0.7rem; color: #94a3b8;">City</div></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="detail-info" style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                            <i class="bi bi-globe" style="color: #3B6FE8; font-size: 0.9rem; margin-top: 0.1rem;"></i>
+                            <div><div class="d-val" style="font-size: 0.85rem; color: #0f172a; font-weight: 500;">{{ tenant.country|default:"-" }}</div><div class="d-lbl" style="font-size: 0.7rem; color: #94a3b8;">Country</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rentals Tab -->
+    <div class="tab-pane fade" id="rentalsinfo" role="tabpanel">
+        <div class="tab-section">
+            <div class="tab-section-header">
+                <h6 class="mb-0">Rental History ({{ tenant_rentals|length }})</h6>
+            </div>
+            {% if tenant_rentals %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" style="font-size:0.88rem;">
+                    <thead>
+                        <tr class="text-muted" style="font-size:0.78rem;">
+                            <th>Property</th>
+                            <th>Period</th>
+                            <th>Monthly Rent</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for rental in tenant_rentals %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'rentals:property_detail' rental.property_obj.pk %}" class="text-decoration-none fw-medium">
+                                    {{ rental.property_obj.name }}
+                                </a>
+                            </td>
+                            <td style="font-size:0.82rem;">{{ rental.start_date|date:"M d, Y" }} &mdash; {{ rental.end_date|date:"M d, Y" }}</td>
+                            <td class="fw-medium">{{ rental.currency }} {{ rental.monthly_rent|floatformat:0 }}</td>
+                            <td>
+                                <span class="badge {% if rental.status == 'active' %}bg-success{% elif rental.status == 'pending' %}bg-warning text-dark{% elif rental.status == 'expired' %}bg-secondary{% else %}bg-danger{% endif %}" style="font-size:0.72rem;">
+                                    {{ rental.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{% url 'rentals:rental_detail' rental.pk %}" class="btn btn-sm btn-outline-primary" style="font-size:0.75rem;">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <i class="bi bi-file-earmark-text" style="font-size:2rem;color:#cbd5e1;"></i>
+                <p class="text-muted mt-2 mb-0" style="font-size:0.88rem;">No rentals found for this tenant.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Payments Tab -->
+    <div class="tab-pane fade" id="paymentsinfo" role="tabpanel">
+        <div class="tab-section">
+            <div class="tab-section-header">
+                <h6 class="mb-0">Payment History ({{ payments|length }})</h6>
+            </div>
+            {% if payments %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" style="font-size:0.88rem;">
+                    <thead>
+                        <tr class="text-muted" style="font-size:0.78rem;">
+                            <th>Receipt #</th>
+                            <th>Property</th>
+                            <th>Amount</th>
+                            <th>Method</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in payments %}
+                        <tr>
+                            <td>
+                                <a href="{{ payment.get_absolute_url }}" class="text-decoration-none fw-medium">{{ payment.receipt_number }}</a>
+                            </td>
+                            <td>
+                                <a href="{% url 'rentals:property_detail' payment.invoice.rental.property_obj.pk %}" class="text-decoration-none">
+                                    {{ payment.invoice.rental.property_obj.name }}
+                                </a>
+                            </td>
+                            <td class="fw-medium">{{ payment.currency }} {{ payment.amount|floatformat:0 }}</td>
+                            <td>
+                                <span class="badge bg-light text-dark" style="font-size:0.72rem;">{{ payment.get_payment_method_display }}</span>
+                            </td>
+                            <td style="font-size:0.82rem;">{{ payment.payment_date|date:"M d, Y" }}</td>
+                            <td>
+                                <span class="badge {% if payment.status == 'completed' %}bg-success{% elif payment.status == 'pending' %}bg-warning text-dark{% elif payment.status == 'refunded' %}bg-info{% else %}bg-danger{% endif %}" style="font-size:0.72rem;">
+                                    {{ payment.get_status_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <i class="bi bi-credit-card" style="font-size:2rem;color:#cbd5e1;"></i>
+                <p class="text-muted mt-2 mb-0" style="font-size:0.88rem;">No payment records found.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if tenant.qr_code_image %}
+    <!-- QR Code Tab -->
+    <div class="tab-pane fade" id="qrinfo" role="tabpanel">
+        <div class="tab-section">
+            <div class="tab-section-header">
+                <h6 class="mb-0">QR Code</h6>
+            </div>
+            <div class="text-center py-3">
+                <img src="{{ tenant.qr_code_image.url }}" alt="QR Code for {{ tenant.name }}" style="max-width:200px;" class="img-fluid rounded shadow-sm">
+                <p class="text-muted mt-2" style="font-size:0.85rem;">Scan this QR code to view tenant details</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

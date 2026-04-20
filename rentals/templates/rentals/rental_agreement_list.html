@@ -1,0 +1,162 @@
+{% extends 'rentals/base.html' %}
+
+{% block title %}Rental Agreements{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-1 fw-bold" style="color: #0f172a; font-size: 1.75rem;">
+            <i class="bi bi-file-earmark-text me-2 text-primary"></i>Rental Agreements
+        </h2>
+        <p class="text-muted mb-0" style="font-size: 0.9rem;">
+            {{ page_obj.paginator.count|default:0 }} agreements registered
+        </p>
+    </div>
+    <a href="{% url 'rentals:rental_list' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Back to Rentals
+    </a>
+</div>
+
+<!-- Filter Bar -->
+<div class="filter-bar">
+    <form method="get" class="row g-3 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label text-muted" style="font-size: 0.8rem; font-weight: 500;">Search</label>
+            <input type="text" class="form-control filter-input" name="search" value="{{ search }}" placeholder="Search agreements...">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label text-muted" style="font-size: 0.8rem; font-weight: 500;">Status</label>
+            <select class="form-select filter-input" name="status">
+                <option value="">All Statuses</option>
+                <option value="draft" {% if status == 'draft' %}selected{% endif %}>Draft</option>
+                <option value="pending_signature" {% if status == 'pending_signature' %}selected{% endif %}>Pending Signature</option>
+                <option value="signed" {% if status == 'signed' %}selected{% endif %}>Signed</option>
+                <option value="active" {% if status == 'active' %}selected{% endif %}>Active</option>
+                <option value="expired" {% if status == 'expired' %}selected{% endif %}>Expired</option>
+                <option value="terminated" {% if status == 'terminated' %}selected{% endif %}>Terminated</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label text-muted" style="font-size: 0.8rem; font-weight: 500;">Type</label>
+            <select class="form-select filter-input" name="agreement_type">
+                <option value="">All Types</option>
+                <option value="lease" {% if agreement_type == 'lease' %}selected{% endif %}>Lease</option>
+                <option value="tenancy" {% if agreement_type == 'tenancy' %}selected{% endif %}>Tenancy</option>
+                <option value="sublease" {% if agreement_type == 'sublease' %}selected{% endif %}>Sublease</option>
+                <option value="room_rental" {% if agreement_type == 'room_rental' %}selected{% endif %}>Room Rental</option>
+                <option value="commercial" {% if agreement_type == 'commercial' %}selected{% endif %}>Commercial</option>
+                <option value="other" {% if agreement_type == 'other' %}selected{% endif %}>Other</option>
+            </select>
+        </div>
+        <div class="col-md-5">
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary filter-btn flex-fill">
+                    <i class="bi bi-search me-1"></i>Filter
+                </button>
+                <a href="{% url 'rentals:rental_agreement_list' %}" class="btn btn-outline-secondary filter-btn">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Agreements Grid -->
+{% if page_obj %}
+<div class="row g-4">
+    {% for agreement in page_obj %}
+    <div class="col-sm-6 col-lg-4 col-xl-3">
+        <div class="listing-card" style="cursor: default;">
+            <div class="listing-card-img bg-light d-flex align-items-center justify-content-center">
+                <div class="text-center">
+                    <i class="bi bi-file-earmark-text" style="font-size: 3.5rem; color: #3B6FE8;"></i>
+                </div>
+                <div class="position-absolute top-0 end-0 m-2">
+                    <span class="badge {% if agreement.status == 'active' %}bg-success{% elif agreement.status == 'signed' %}bg-primary{% elif agreement.status == 'pending_signature' %}bg-warning text-dark{% elif agreement.status == 'expired' %}bg-danger{% else %}bg-secondary{% endif %} badge-pill">
+                        {{ agreement.get_status_display }}
+                    </span>
+                </div>
+            </div>
+            <div class="listing-card-body">
+                <div class="d-flex justify-content-between align-items-start mb-1">
+                    <span class="badge bg-secondary" style="font-size: 0.65rem;">{{ agreement.agreement_number }}</span>
+                    <span class="badge bg-light text-dark border" style="font-size: 0.65rem;">{{ agreement.get_agreement_type_display }}</span>
+                </div>
+                <h6 class="listing-title">{{ agreement.title }}</h6>
+                <div class="mb-2" style="font-size: 0.8rem; color: #64748b;">
+                    <div class="text-truncate"><i class="bi bi-house me-1 text-muted"></i>{{ agreement.rental.property_obj.name }}</div>
+                    {% if agreement.rental.tenant %}
+                    <div class="text-truncate"><i class="bi bi-person me-1 text-muted"></i>{{ agreement.rental.tenant.name }}</div>
+                    {% endif %}
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
+                    <span style="font-size: 0.75rem; color: #94a3b8;">
+                        <i class="bi bi-calendar3 me-1"></i>{{ agreement.effective_date|date:"M d, Y" }}
+                    </span>
+                    <div class="btn-group btn-group-sm">
+                        <a href="{% url 'rentals:rental_agreement_detail' agreement.pk %}" class="btn btn-outline-primary" title="View">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        {% if agreement.agreement_file %}
+                        <a href="{{ agreement.agreement_file.url }}" download class="btn btn-outline-success" title="Download">
+                            <i class="bi bi-download"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if page_obj.has_other_pages %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if agreement_type %}&agreement_type={{ agreement_type }}{% endif %}">
+                <i class="bi bi-chevron-left"></i>
+            </a>
+        </li>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <li class="page-item active">
+                <span class="page-link">{{ num }}</span>
+            </li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ num }}{% if search %}&search={{ search }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if agreement_type %}&agreement_type={{ agreement_type }}{% endif %}">{{ num }}</a>
+            </li>
+            {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if agreement_type %}&agreement_type={{ agreement_type }}{% endif %}">
+                <i class="bi bi-chevron-right"></i>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<!-- Empty State -->
+<div class="text-center py-5">
+    <div style="width: 120px; height: 120px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+        <i class="bi bi-file-earmark-text" style="font-size: 3.5rem; color: #cbd5e1;"></i>
+    </div>
+    <h4 class="fw-bold" style="color: #0f172a;">No agreements found</h4>
+    <p class="text-muted mb-4">Try adjusting your filters.</p>
+    {% if search or status or agreement_type %}
+    <a href="{% url 'rentals:rental_agreement_list' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-clockwise me-2"></i>Clear All Filters
+    </a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,191 @@
+{% load crispy_forms_tags %}
+{% if form.errors %}
+    <div class="alert alert-danger py-2 mb-2" style="font-size: 0.8rem;">
+        Please correct the errors indicated below.
+    </div>
+{% endif %}
+<form id="listingForm" method="post" enctype="multipart/form-data" action="{% if edit %}{% url 'marketplace:edit_listing' listing.pk %}{% else %}{% url 'marketplace:post_listing' %}{% endif %}">
+    {% csrf_token %}
+
+    <!-- Step Progress -->
+    <div class="d-flex justify-content-between mb-3 px-2" id="stepProgress">
+        <div class="step-dot active" data-step="1"><span>1</span><small>Details</small></div>
+        <div class="step-line"></div>
+        <div class="step-dot" data-step="2"><span>2</span><small>Location & Rent</small></div>
+        <div class="step-line"></div>
+        <div class="step-dot" data-step="3"><span>3</span><small>Amenities</small></div>
+        <div class="step-line"></div>
+        <div class="step-dot" data-step="4"><span>4</span><small>Household</small></div>
+        <div class="step-line"></div>
+        <div class="step-dot" data-step="5"><span>5</span><small>Preferences</small></div>
+        <div class="step-line"></div>
+        <div class="step-dot" data-step="6"><span>6</span><small>Photos</small></div>
+    </div>
+
+    <!-- Step 1: Basic Info -->
+    <div class="form-step active" id="step1">
+        <h6 class="fw-bold mb-2"><i class="bi bi-info-circle me-1" style="color:#3B6FE8;"></i>Basic Information</h6>
+        <div class="row g-2">
+            <div class="col-md-12">{{ form.title|as_crispy_field }}</div>
+            <div class="col-md-12">{{ form.description|as_crispy_field }}</div>
+            <div class="col-md-4">{{ form.currency|as_crispy_field }}</div>
+            <div class="col-md-4">{{ form.room_type|as_crispy_field }}</div>
+            <div class="col-md-4">{{ form.property_type|as_crispy_field }}</div>
+        </div>
+    </div>
+
+    <!-- Step 2: Location & Rent -->
+    <div class="form-step" id="step2">
+        <h6 class="fw-bold mb-2"><i class="bi bi-geo-alt me-1" style="color:#3B6FE8;"></i>Location & Rent</h6>
+        <div class="row g-2">
+            <div class="col-md-5">{{ form.address|as_crispy_field }}</div>
+            <div class="col-md-4">{{ form.city|as_crispy_field }}</div>
+            <div class="col-md-3">{{ form.postcode|as_crispy_field }}</div>
+            <div class="col-md-4">{{ form.monthly_rent|as_crispy_field }}</div>
+            <div class="col-md-4">{{ form.deposit|as_crispy_field }}</div>
+            <div class="col-md-4">{{ form.available_from|as_crispy_field }}</div>
+            <div class="col-md-6">{{ form.min_term|as_crispy_field }}</div>
+            <div class="col-md-6">{{ form.max_term|as_crispy_field }}</div>
+            <div class="col-md-6">{{ form.current_occupants|as_crispy_field }}</div>
+            <div class="col-md-6">{{ form.max_occupants|as_crispy_field }}</div>
+        </div>
+    </div>
+
+    <!-- Step 3: Amenities -->
+    <div class="form-step" id="step3">
+        <h6 class="fw-bold mb-2"><i class="bi bi-house-check me-1" style="color:#3B6FE8;"></i>Amenities</h6>
+        <div class="row g-1">
+            <div class="col-md-4 sc">{{ form.bills_included|as_crispy_field }}</div>
+            <div class="col-md-4 sc">{{ form.furnished|as_crispy_field }}</div>
+            <div class="col-md-4 sc">{{ form.has_wifi|as_crispy_field }}</div>
+            <div class="col-md-4 sc">{{ form.has_parking|as_crispy_field }}</div>
+            <div class="col-md-4 sc">{{ form.has_garage|as_crispy_field }}</div>
+            <div class="col-md-4 sc">{{ form.has_garden|as_crispy_field }}</div>
+            <div class="col-md-4 sc">{{ form.has_balcony|as_crispy_field }}</div>
+            <div class="col-md-4 sc">{{ form.has_disabled_access|as_crispy_field }}</div>
+            <div class="col-md-4 sc">{{ form.has_living_room|as_crispy_field }}</div>
+            <div class="col-md-4 sc">{{ form.has_washing_machine|as_crispy_field }}</div>
+            <div class="col-md-4 sc">{{ form.has_dishwasher|as_crispy_field }}</div>
+        </div>
+    </div>
+
+    <!-- Step 4: Household -->
+    <div class="form-step" id="step4">
+        <h6 class="fw-bold mb-2"><i class="bi bi-people me-1" style="color:#3B6FE8;"></i>Current Household</h6>
+        <div class="row g-2">
+            <div class="col-md-6">{{ form.hh_min_age|as_crispy_field }}</div>
+            <div class="col-md-6">{{ form.hh_max_age|as_crispy_field }}</div>
+            <div class="col-md-6">{{ form.hh_occupation|as_crispy_field }}</div>
+            <div class="col-md-6">{{ form.hh_gender|as_crispy_field }}</div>
+            <div class="col-md-12">{{ form.hh_university|as_crispy_field }}</div>
+            <div class="col-md-6 sc">{{ form.hh_smoker|as_crispy_field }}</div>
+            <div class="col-md-6 sc">{{ form.hh_pets|as_crispy_field }}</div>
+        </div>
+    </div>
+
+    <!-- Step 5: Preferences -->
+    <div class="form-step" id="step5">
+        <h6 class="fw-bold mb-2"><i class="bi bi-person-check me-1" style="color:#3B6FE8;"></i>Preferred Flatmate</h6>
+        <div class="row g-2">
+            <div class="col-md-6">{{ form.min_preferred_age|as_crispy_field }}</div>
+            <div class="col-md-6">{{ form.max_preferred_age|as_crispy_field }}</div>
+            <div class="col-md-6">{{ form.preferred_occupation|as_crispy_field }}</div>
+            <div class="col-md-6 sc">{{ form.references_required|as_crispy_field }}</div>
+            <div class="col-md-4 sc">{{ form.smokers_ok|as_crispy_field }}</div>
+            <div class="col-md-4 sc">{{ form.pets_ok|as_crispy_field }}</div>
+            <div class="col-md-4 sc">{{ form.couples_ok|as_crispy_field }}</div>
+            <div class="col-md-4 sc">{{ form.students_ok|as_crispy_field }}</div>
+            <div class="col-md-4 sc">{{ form.dss_ok|as_crispy_field }}</div>
+        </div>
+    </div>
+
+    <!-- Step 6: Photos -->
+    <div class="form-step" id="step6">
+        <h6 class="fw-bold mb-2"><i class="bi bi-camera me-1" style="color:#3B6FE8;"></i>Photos</h6>
+        {% if edit and photos %}
+        <label class="form-label fw-bold small mb-1">Current Photos</label>
+        <div class="d-flex flex-wrap gap-2 mb-2" id="currentPhotos">
+            {% for photo in photos %}
+            <div class="position-relative photo-item" id="photo-{{ photo.pk }}">
+                <img src="{{ photo.image.url }}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px;">
+                <button type="button" onclick="deletePhoto('{{ photo.pk }}')" 
+                        class="btn btn-danger btn-sm position-absolute top-0 end-0 p-0 d-flex align-items-center justify-content-center" 
+                        style="width: 18px; height: 18px; border-radius: 50%; border: 1px solid white;">
+                    <i class="bi bi-x" style="font-size: 12px;"></i>
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <label class="form-label fw-bold small mb-1">{% if edit %}Add More Photos{% else %}Upload Photos{% endif %}</label>
+        <input type="file" name="photos" class="form-control form-control-sm" multiple accept="image/*">
+        <small class="text-muted">You can select multiple images at once.</small>
+    </div>
+
+    <!-- Navigation -->
+    <div class="d-flex justify-content-between mt-3 pt-2 border-top">
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="prevBtn" onclick="prevStep()" style="display:none;">
+            <i class="bi bi-chevron-left me-1"></i>Back
+        </button>
+        <div></div>
+        <button type="button" class="btn btn-sm btn-primary" id="nextBtn" onclick="nextStep()">
+            Next<i class="bi bi-chevron-right ms-1"></i>
+        </button>
+    </div>
+</form>
+
+<style>
+    #listingForm {
+        font-size: 0.84rem;
+    }
+    #listingForm .row {
+        --bs-gutter-x: 0.55rem;
+        --bs-gutter-y: 0.4rem;
+    }
+    #listingForm .form-control,
+    #listingForm .form-select {
+        font-size: 0.8rem;
+        padding: 0.35rem 0.55rem;
+    }
+    #listingForm .form-label {
+        font-size: 0.73rem;
+        margin-bottom: 0.2rem;
+        font-weight: 600;
+    }
+
+    /* Step progress */
+    #stepProgress {
+        margin-bottom: 0.75rem !important;
+    }
+    .step-dot {
+        display: flex; flex-direction: column; align-items: center; gap: 2px;
+    }
+    .step-dot span {
+        width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        font-size: 0.68rem; font-weight: 700; background: #e2e8f0; color: #64748b; transition: all 0.2s;
+    }
+    .step-dot.active span { background: #3B6FE8; color: #fff; }
+    .step-dot.done span { background: #10b981; color: #fff; }
+    .step-dot small { font-size: 0.6rem; color: #94a3b8; font-weight: 500; }
+    .step-dot.active small { color: #3B6FE8; font-weight: 600; }
+    .step-dot.done small { color: #10b981; }
+    .step-line { flex: 1; height: 2px; background: #e2e8f0; align-self: center; margin-top: -10px; }
+
+    /* Form steps */
+    .form-step { display: none; }
+    .form-step.active { display: block; }
+    .form-step h6 {
+        font-size: 0.82rem;
+        margin-bottom: 0.45rem !important;
+    }
+
+    /* Small checkboxes */
+    .sc .form-check-label { font-size: 0.76rem; }
+    .sc .form-check { margin-bottom: 0.2rem; }
+
+    #listingForm .btn.btn-sm {
+        font-size: 0.76rem;
+        padding: 0.32rem 0.65rem;
+    }
+</style>
+

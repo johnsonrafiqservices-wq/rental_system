@@ -1,0 +1,163 @@
+{% extends 'marketplace/base.html' %}
+{% block title %}RoomFinder — Find Your Perfect Room{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<section style="background:linear-gradient(135deg,#1a1a2e 0%,#16213e 60%,#0f3460 100%);padding:2.5rem 0 3.5rem;color:#fff;position:relative;overflow:hidden;">
+    <div style="position:absolute;top:-60px;right:-80px;width:420px;height:420px;background:rgba(59,111,232,0.12);border-radius:50%;"></div>
+    <div style="position:absolute;bottom:-80px;left:-60px;width:320px;height:320px;background:rgba(59,111,232,0.08);border-radius:50%;"></div>
+    <div class="container text-center position-relative">
+        <div class="mb-2">
+            <span style="background:rgba(59,111,232,0.2);color:#3B6FE8;border-radius:20px;padding:4px 16px;font-size:0.82rem;font-weight:600;letter-spacing:0.5px;">
+                {{ total_listings }} rooms available now
+            </span>
+        </div>
+        <h1 class="display-5 fw-800 mb-2" style="font-weight:800;letter-spacing:-1px; color:#ffffff;">
+            Find Your <span style="color:#3B6FE8;">Perfect Room</span>
+        </h1>
+        <p class="mb-3 text-white-50" style="font-size: 1rem;">Search thousands of rooms to rent from verified landlords.</p>
+
+        <!-- Hero search -->
+        <form action="{% url 'marketplace:listing_list' %}" method="get" class="d-flex justify-content-center">
+            <div class="d-flex w-100" style="max-width:580px;background:#fff;border-radius:50px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.3);">
+                <div class="d-flex align-items-center px-3" style="color:#9ca3af;flex-shrink:0;">
+                    <i class="bi bi-geo-alt fs-6"></i>
+                </div>
+                <input type="text" name="q" class="form-control border-0 shadow-none py-2" placeholder="City, area or postcode..." style="font-size:0.9rem;flex:1;">
+                <button type="submit" class="btn px-4 m-1 fw-semibold py-1" style="background:#3B6FE8;color:#fff;border-radius:40px;white-space:nowrap;font-size:0.9rem;">
+                    <i class="bi bi-search me-1"></i>Search
+                </button>
+            </div>
+        </form>
+
+        <!-- Quick filter pills -->
+        <div class="d-flex flex-wrap justify-content-center gap-2 mt-4">
+            {% for city in cities %}
+            <a href="{% url 'marketplace:listing_list' %}?city={{ city }}" class="btn btn-sm"
+               style="background:rgba(255,255,255,0.1);color:#fff;border-radius:20px;border:1px solid rgba(255,255,255,0.2);font-size:0.82rem;">
+                <i class="bi bi-geo-alt me-1"></i>{{ city }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Stats strip -->
+<div style="background:#fff;border-bottom:1px solid #e5e7eb;">
+    <div class="container py-3">
+        <div class="row text-center gy-2">
+            <div class="col-4">
+                <div style="font-size:1.25rem;font-weight:800;color:#3B6FE8;">{{ total_listings }}+</div>
+                <div style="font-size:0.88rem;color:#6b7280;">Active Rooms</div>
+            </div>
+            <div class="col-4">
+                <div style="font-size:1.25rem;font-weight:800;color:#3B6FE8;">100%</div>
+                <div style="font-size:0.88rem;color:#6b7280;">Free to Search</div>
+            </div>
+            <div class="col-4">
+                <div style="font-size:1.25rem;font-weight:800;color:#3B6FE8;">24/7</div>
+                <div style="font-size:0.88rem;color:#6b7280;">Enquire Anytime</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Featured Listings -->
+<div class="container py-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <div>
+            <div class="section-title">Latest Rooms</div>
+            <div class="section-sub">Fresh listings posted recently</div>
+        </div>
+        <a href="{% url 'marketplace:listing_list' %}" class="btn btn-sm fw-semibold" style="background:#3B6FE8;color:#fff;border-radius:20px;">
+            View All <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+    </div>
+
+    {% if featured %}
+    <div class="row g-4">
+        {% for listing in featured %}
+        <div class="col-sm-6 col-lg-3">
+            <a href="{% url 'marketplace:listing_detail' listing.pk %}" class="listing-card d-block text-decoration-none">
+                <div class="listing-card-img">
+                    {% with listing.primary_photo as photo %}
+                    {% if photo %}
+                        <img src="{{ photo.image.url }}" alt="{{ listing.title }}">
+                    {% else %}
+                        <div style="width:100%;height:160px;display:flex;align-items:center;justify-content:center;background:#f1f5f9;">
+                            <i class="bi bi-house" style="font-size:3rem;color:#cbd5e1;"></i>
+                        </div>
+                    {% endif %}
+                    {% endwith %}
+                </div>
+                <div class="listing-card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="listing-price">{{ listing.currency }} {{ listing.monthly_rent|floatformat:0 }}<small>/mo</small></div>
+                        {% if listing.bills_included %}<span class="pill green">Bills incl.</span>{% endif %}
+                    </div>
+                    <div class="listing-title mt-1">{{ listing.title }}</div>
+                    <div class="listing-location"><i class="bi bi-geo-alt me-1"></i>{{ listing.city }}{% if listing.postcode %}, {{ listing.postcode }}{% endif %}</div>
+                    <div class="listing-badges d-flex flex-wrap gap-1 mt-2">
+                        <span class="badge bg-light text-dark border">{{ listing.get_room_type_display }}</span>
+                        {% if listing.furnished %}<span class="badge bg-light text-dark border">Furnished</span>{% endif %}
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-house" style="font-size:3rem;color:#cbd5e1;"></i>
+        <p class="text-muted mt-3">No listings yet. <a href="{% url 'marketplace:post_listing' %}">Be the first to post a room!</a></p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- How it works -->
+<div style="background:#fff;padding:2.5rem 0;border-top:1px solid #e5e7eb;">
+    <div class="container">
+        <div class="text-center mb-5">
+            <div class="section-title">How It Works</div>
+            <div class="section-sub">Three simple steps to find or let your room</div>
+        </div>
+        <div class="row g-4 text-center">
+            <div class="col-md-4">
+                <div style="width:64px;height:64px;background:#fff5f5;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+                    <i class="bi bi-search" style="font-size:1.6rem;color:#3B6FE8;"></i>
+                </div>
+                <h5 class="fw-700">Search</h5>
+                <p class="text-muted" style="font-size:0.9rem;">Browse thousands of rooms by city, price, type and more.</p>
+            </div>
+            <div class="col-md-4">
+                <div style="width:64px;height:64px;background:#fff5f5;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+                    <i class="bi bi-envelope-open" style="font-size:1.6rem;color:#3B6FE8;"></i>
+                </div>
+                <h5 class="fw-700">Enquire</h5>
+                <p class="text-muted" style="font-size:0.9rem;">Send a message directly to the landlord through our platform.</p>
+            </div>
+            <div class="col-md-4">
+                <div style="width:64px;height:64px;background:#fff5f5;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+                    <i class="bi bi-house-check" style="font-size:1.6rem;color:#3B6FE8;"></i>
+                </div>
+                <h5 class="fw-700">Move In</h5>
+                <p class="text-muted" style="font-size:0.9rem;">Arrange a viewing, agree terms and move into your new home.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA for landlords -->
+<div style="background:linear-gradient(135deg,#3B6FE8,#2858C5);padding:2.5rem 0;">
+    <div class="container text-center text-white">
+        <h3 class="fw-800 mb-2">Have a Room to Let?</h3>
+        <p class="mb-4 opacity-75">List your room for free and reach thousands of room seekers.</p>
+        <a href="{% url 'marketplace:register' %}?role=landlord" class="btn btn-lg fw-bold px-5"
+           style="background:#fff;color:#3B6FE8;border-radius:30px;">
+            <i class="bi bi-plus-circle me-2"></i>Post Your Room — It's Free
+        </a>
+    </div>
+</div>
+
+{% endblock %}

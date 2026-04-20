@@ -1,0 +1,150 @@
+{% extends 'rentals/base.html' %}
+
+{% block title %}Add Property - Rental Management{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="mb-3"><i class="bi bi-building-plus me-2"></i>Add Property</h2>
+        <a href="{% url 'rentals:property_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back to Properties
+        </a>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card">
+            <div class="card-body">
+                <form method="post" action="{% url 'rentals:property_create' %}">
+                    {% csrf_token %}
+                    
+                    <h5 class="mb-3">Basic Information</h5>
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            {{ form.owner.errors }}
+                            <label class="form-label">{{ form.owner.label }}</label>
+                            {{ form.owner }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.property_type.errors }}
+                            <label class="form-label">{{ form.property_type.label }}</label>
+                            {{ form.property_type }}
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            {{ form.name.errors }}
+                            <label class="form-label">{{ form.name.label }}</label>
+                            {{ form.name }}
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            {{ form.description.errors }}
+                            <label class="form-label">{{ form.description.label }}</label>
+                            {{ form.description }}
+                        </div>
+                    </div>
+
+                    <h5 class="mb-3">Location</h5>
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            {{ form.address.errors }}
+                            <label class="form-label">{{ form.address.label }}</label>
+                            {{ form.address }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.city.errors }}
+                            <label class="form-label">{{ form.city.label }}</label>
+                            {{ form.city }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            {{ form.state_province.errors }}
+                            <label class="form-label">{{ form.state_province.label }}</label>
+                            {{ form.state_province }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            {{ form.postal_code.errors }}
+                            <label class="form-label">{{ form.postal_code.label }}</label>
+                            {{ form.postal_code }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            {{ form.country.errors }}
+                            <label class="form-label">{{ form.country.label }}</label>
+                            {{ form.country }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.latitude.errors }}
+                            <label class="form-label">{{ form.latitude.label }}</label>
+                            {{ form.latitude }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.longitude.errors }}
+                            <label class="form-label">{{ form.longitude.label }}</label>
+                            {{ form.longitude }}
+                        </div>
+                    </div>
+
+                    <h5 class="mb-3">Property Details</h5>
+                    <div class="row mb-4">
+                        <div class="col-md-3 mb-3">
+                            {{ form.area_sq_meters.errors }}
+                            <label class="form-label">{{ form.area_sq_meters.label }}</label>
+                            {{ form.area_sq_meters }}
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            {{ form.number_of_rooms.errors }}
+                            <label class="form-label">{{ form.number_of_rooms.label }}</label>
+                            {{ form.number_of_rooms }}
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            {{ form.number_of_bathrooms.errors }}
+                            <label class="form-label">{{ form.number_of_bathrooms.label }}</label>
+                            {{ form.number_of_bathrooms }}
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            {{ form.floor_number.errors }}
+                            <label class="form-label">{{ form.floor_number.label }}</label>
+                            {{ form.floor_number }}
+                        </div>
+                    </div>
+
+                    <h5 class="mb-3">Financial</h5>
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            {{ form.base_rent.errors }}
+                            <label class="form-label">{{ form.base_rent.label }}</label>
+                            {{ form.base_rent }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.currency.errors }}
+                            <label class="form-label">{{ form.currency.label }}</label>
+                            {{ form.currency }}
+                        </div>
+                    </div>
+
+                    <h5 class="mb-3">Status</h5>
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check">
+                                {{ form.is_active }}
+                                <label class="form-check-label" for="{{ form.is_active.id_for_label }}">Active</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check">
+                                {{ form.is_available }}
+                                <label class="form-check-label" for="{{ form.is_available.id_for_label }}">Available for Rent</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'rentals:property_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-1"></i>Create Property & Generate QR Code
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

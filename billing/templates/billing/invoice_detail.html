@@ -1,0 +1,285 @@
+{% extends 'rentals/base.html' %}
+
+{% block title %}{{ invoice.invoice_number }}{% endblock %}
+
+{% block content %}
+<style>
+.progress-thin{height:8px;border-radius:4px;}
+#detailsinfo .details-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.8rem 1rem;
+}
+#detailsinfo .details-grid .sub-section {
+    margin-bottom: 0;
+}
+#detailsinfo .details-grid .sub-section.full-width {
+    grid-column: 1 / -1;
+}
+@media (max-width: 992px) {
+    #detailsinfo .details-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+@media (max-width: 576px) {
+    #detailsinfo .details-grid {
+        grid-template-columns: 1fr;
+    }
+}
+@media print {
+    .sidebar, .nav-tabs-custom, .profile-actions, .btn, .no-print { display: none !important; }
+    .main-content { margin-left: 0 !important; padding: 0 !important; }
+    .profile-header { background: none !important; border-bottom: 2px solid #333; padding: 1rem 0; }
+    .profile-avatar { background: #f0f0f0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .tab-content > .tab-pane { display: block !important; opacity: 1 !important; }
+    .tab-pane:not(#overview) { display: none !important; }
+    .tab-section { border: 1px solid #ddd; margin-bottom: 1rem; break-inside: avoid; }
+    body { background: white; }
+    .card { border: 1px solid #ddd !important; box-shadow: none !important; }
+}
+</style>
+
+<!-- Profile Header -->
+<div class="profile-header">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+        <div class="d-flex align-items-start gap-3">
+            <div class="profile-avatar" style="background:linear-gradient(135deg,#0d9488,#0f766e);">
+                <i class="bi bi-receipt"></i>
+            </div>
+            <div>
+                <div class="profile-name">{{ invoice.invoice_number }}</div>
+                <div class="profile-meta mb-2">
+                    <span><i class="bi bi-building me-1"></i>{{ invoice.rental.property_obj.name }}</span>
+                    <span><i class="bi bi-person me-1"></i>{{ invoice.rental.tenant.name }}</span>
+                    <span><i class="bi bi-calendar me-1"></i>{{ invoice.period_start|date:"M d" }} &ndash; {{ invoice.period_end|date:"M d, Y" }}</span>
+                </div>
+                <small class="text-muted">{{ invoice.pk }}</small>
+            </div>
+        </div>
+        <div class="text-end">
+            <span class="badge {% if invoice.status == 'paid' %}bg-success{% elif invoice.status == 'overdue' %}bg-danger{% elif invoice.status == 'partially_paid' %}bg-warning text-dark{% elif invoice.status == 'sent' %}bg-info{% elif invoice.status == 'cancelled' %}bg-secondary{% else %}bg-light text-dark border{% endif %}" style="font-size:0.9rem;padding:0.4rem 1rem;border-radius:20px;">
+                {{ invoice.get_status_display }}
+            </span>
+            <small class="text-muted d-block mt-1">Issued {{ invoice.issue_date|date:"M d, Y" }}</small>
+        </div>
+    </div>
+    <div class="profile-actions mt-3 d-flex flex-wrap gap-2">
+        {% if invoice.status != 'paid' and invoice.status != 'cancelled' %}
+        <a href="{% url 'billing:payment_create' %}?invoice={{ invoice.pk }}" class="btn btn-success btn-sm">
+            <i class="bi bi-cash-stack me-1"></i>Record Payment
+        </a>
+        {% endif %}
+        <a href="{% url 'billing:invoice_edit' invoice.pk %}" class="btn btn-primary btn-sm">
+            <i class="bi bi-pencil me-1"></i>Edit Invoice
+        </a>
+        <a href="{% url 'billing:invoice_print' invoice.pk %}" class="btn btn-outline-dark btn-sm" target="_blank">
+            <i class="bi bi-printer me-1"></i>Print Invoice
+        </a>
+        <a href="{% url 'billing:invoice_list' %}" class="btn btn-outline-secondary btn-sm no-print">
+            <i class="bi bi-arrow-left me-1"></i>Back
+        </a>
+    </div>
+</div>
+
+<!-- Tab Navigation -->
+<ul class="nav nav-tabs-custom nav-tabs" id="invoiceTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button">
+            <i class="bi bi-grid"></i>Overview
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="payments-tab" data-bs-toggle="tab" data-bs-target="#paymentsinfo" type="button">
+            <i class="bi bi-cash-stack"></i>Payments
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="details-tab" data-bs-toggle="tab" data-bs-target="#detailsinfo" type="button">
+            <i class="bi bi-info-circle"></i>Details
+        </button>
+    </li>
+</ul>
+
+<!-- Tab Content -->
+<div class="tab-content" id="invoiceTabsContent">
+
+    <!-- Overview Tab -->
+    <div class="tab-pane fade show active" id="overview" role="tabpanel">
+        <div class="tab-section">
+            <div class="tab-section-header">
+                <h6 class="mb-0">Financial Breakdown</h6>
+            </div>
+            <table class="table table-borderless mb-0" style="font-size:0.9rem;">
+                <tr>
+                    <td class="text-muted">Rent Amount</td>
+                    <td class="text-end fw-semibold">{{ invoice.rent_amount|floatformat:0 }} {{ invoice.currency }}</td>
+                </tr>
+                {% if invoice.tax_amount > 0 %}
+                <tr>
+                    <td class="text-muted">Tax</td>
+                    <td class="text-end">{{ invoice.tax_amount|floatformat:0 }} {{ invoice.currency }}</td>
+                </tr>
+                {% endif %}
+                {% if invoice.additional_charges > 0 %}
+                <tr>
+                    <td class="text-muted">Additional Charges</td>
+                    <td class="text-end">{{ invoice.additional_charges|floatformat:0 }} {{ invoice.currency }}</td>
+                </tr>
+                {% endif %}
+                {% if invoice.discount > 0 %}
+                <tr>
+                    <td class="text-muted">Discount</td>
+                    <td class="text-end text-danger">-{{ invoice.discount|floatformat:0 }} {{ invoice.currency }}</td>
+                </tr>
+                {% endif %}
+                <tr class="border-top">
+                    <td class="fw-bold">Total</td>
+                    <td class="text-end fw-bold" style="font-size:1.1rem;">{{ invoice.total_amount|floatformat:0 }} {{ invoice.currency }}</td>
+                </tr>
+            </table>
+        </div>
+        <div class="tab-section">
+            <div class="tab-section-header">
+                <h6 class="mb-0">Payment Status</h6>
+            </div>
+            <div class="detail-info">
+                <i class="bi bi-check2-circle"></i>
+                <div><div class="d-val" style="color:#10b981;">{{ invoice.amount_paid|floatformat:0 }} {{ invoice.currency }}</div><div class="d-lbl">Amount Paid</div></div>
+            </div>
+            <div class="detail-info">
+                <i class="bi bi-exclamation-circle"></i>
+                <div><div class="d-val {% if invoice.balance_due > 0 %}text-danger fw-bold{% endif %}">{{ invoice.balance_due|floatformat:0 }} {{ invoice.currency }}</div><div class="d-lbl">Balance Due</div></div>
+            </div>
+            <div class="mt-3">
+                <div class="d-flex justify-content-between" style="font-size:0.8rem;">
+                    <span class="text-muted">Payment Progress</span>
+                    <span class="fw-semibold">{{ invoice.payment_percentage }}%</span>
+                </div>
+                <div class="progress progress-thin mt-1">
+                    <div class="progress-bar {% if invoice.payment_percentage == 100 %}bg-success{% elif invoice.payment_percentage > 0 %}bg-warning{% else %}bg-secondary{% endif %}" style="width:{{ invoice.payment_percentage }}%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payments Tab -->
+    <div class="tab-pane fade" id="paymentsinfo" role="tabpanel">
+        <div class="tab-section">
+            <div class="tab-section-header">
+                <h6 class="mb-0">Payment History</h6>
+                {% if invoice.status != 'paid' and invoice.status != 'cancelled' %}
+                <a href="{% url 'billing:payment_create' %}?invoice={{ invoice.pk }}" class="btn btn-sm btn-outline-success" style="font-size:0.78rem;">
+                    <i class="bi bi-plus me-1"></i>Add Payment
+                </a>
+                {% endif %}
+            </div>
+            {% if payments %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" style="font-size:0.88rem;">
+                    <thead>
+                        <tr class="text-muted" style="font-size:0.8rem;">
+                            <th>Receipt</th>
+                            <th>Date</th>
+                            <th>Method</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in payments %}
+                        <tr>
+                            <td class="fw-semibold">{{ p.receipt_number }}</td>
+                            <td>{{ p.payment_date|date:"M d, Y" }}</td>
+                            <td>{{ p.get_payment_method_display }}</td>
+                            <td class="fw-semibold" style="color:#10b981;">{{ p.amount|floatformat:0 }} {{ p.currency }}</td>
+                            <td>
+                                <span class="badge {% if p.status == 'completed' %}bg-success{% elif p.status == 'pending' %}bg-warning text-dark{% elif p.status == 'failed' %}bg-danger{% else %}bg-secondary{% endif %}" style="font-size:0.75rem;">{{ p.get_status_display }}</span>
+                            </td>
+                            <td>
+                                <a href="{% url 'billing:payment_detail' p.pk %}" class="btn btn-sm btn-outline-primary" style="font-size:0.75rem;"><i class="bi bi-eye"></i></a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <i class="bi bi-cash" style="font-size:2rem;color:#cbd5e1;"></i>
+                <p class="text-muted mt-2 mb-0" style="font-size:0.88rem;">No payments recorded yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Details Tab -->
+    <div class="tab-pane fade" id="detailsinfo" role="tabpanel">
+        <div class="tab-section">
+            <div class="tab-section-header">
+                <h6 class="mb-0">Invoice Details</h6>
+            </div>
+            <div class="details-grid">
+                <div class="sub-section">
+                    <div class="sub-section-title">Billing Period</div>
+                    <div class="detail-info">
+                        <i class="bi bi-calendar-range"></i>
+                        <div><div class="d-val">{{ invoice.period_start|date:"M d, Y" }} &ndash; {{ invoice.period_end|date:"M d, Y" }}</div><div class="d-lbl">Period</div></div>
+                    </div>
+                </div>
+                <div class="sub-section">
+                    <div class="sub-section-title">Important Dates</div>
+                    <div class="detail-info">
+                        <i class="bi bi-calendar-plus"></i>
+                        <div><div class="d-val">{{ invoice.issue_date|date:"M d, Y" }}</div><div class="d-lbl">Issue Date</div></div>
+                    </div>
+                    <div class="detail-info">
+                        <i class="bi bi-calendar-event"></i>
+                        <div><div class="d-val {% if invoice.is_overdue %}text-danger fw-bold{% endif %}">{{ invoice.due_date|date:"M d, Y" }}{% if invoice.is_overdue %} (OVERDUE){% endif %}</div><div class="d-lbl">Due Date</div></div>
+                    </div>
+                </div>
+                <div class="sub-section">
+                    <div class="sub-section-title">Property</div>
+                    <div class="detail-info">
+                        <i class="bi bi-building"></i>
+                        <div><div class="d-val"><a href="{% url 'rentals:property_detail' invoice.rental.property_obj.pk %}">{{ invoice.rental.property_obj.name }}</a></div><div class="d-lbl">Property Name</div></div>
+                    </div>
+                    <div class="detail-info">
+                        <i class="bi bi-geo-alt"></i>
+                        <div><div class="d-val">{{ invoice.rental.property_obj.address }}, {{ invoice.rental.property_obj.city }}</div><div class="d-lbl">Location</div></div>
+                    </div>
+                </div>
+                <div class="sub-section">
+                    <div class="sub-section-title">Tenant</div>
+                    <a href="{% url 'rentals:tenant_detail' invoice.rental.tenant.pk %}" class="d-flex align-items-center gap-2 text-decoration-none py-1">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:40px;height:40px;background:#ede9fe;">
+                            <i class="bi {% if invoice.rental.tenant.tenant_type == 'company' %}bi-building{% else %}bi-person{% endif %}" style="color:#7c3aed;font-size:1rem;"></i>
+                        </div>
+                        <div>
+                            <div style="font-size:0.92rem;font-weight:600;color:#1e293b;">{{ invoice.rental.tenant.name }}</div>
+                            <div style="font-size:0.78rem;color:#94a3b8;">{{ invoice.rental.tenant.get_tenant_type_display }}</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="sub-section">
+                    <div class="sub-section-title">Rental Agreement</div>
+                    <div class="detail-info">
+                        <i class="bi bi-file-contract"></i>
+                        <div><div class="d-val"><a href="{% url 'rentals:rental_detail' invoice.rental.pk %}">View Agreement</a></div><div class="d-lbl">{{ invoice.rental.start_date|date:"M d, Y" }} &ndash; {{ invoice.rental.end_date|date:"M d, Y" }}</div></div>
+                    </div>
+                    <div class="detail-info">
+                        <i class="bi bi-cash"></i>
+                        <div><div class="d-val">{{ invoice.rental.monthly_rent }} {{ invoice.rental.currency }}</div><div class="d-lbl">Monthly Rent</div></div>
+                    </div>
+                </div>
+                {% if invoice.notes %}
+                <div class="sub-section full-width">
+                    <div class="sub-section-title">Notes</div>
+                    <p class="mb-0" style="font-size:0.9rem;color:#334155;">{{ invoice.notes|linebreaksbr }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

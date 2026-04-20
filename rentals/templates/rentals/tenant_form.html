@@ -1,0 +1,122 @@
+{% extends 'rentals/base.html' %}
+
+{% block title %}{% if form.instance.pk %}Edit Tenant{% else %}Register Tenant{% endif %} - Rental Management{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="mb-0">
+            <i class="bi bi-person-badge me-2"></i>{% if form.instance.pk %}Edit Tenant{% else %}Register Tenant{% endif %}
+        </h2>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                    <li>{{ field }}: {{ error }}</li>
+                    {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+            
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Tenant Type</label>
+                {{ form.tenant_type }}
+            </div>
+            
+            <div id="company_fields" style="display:none;">
+                <h6 class="text-muted mb-3">Company Information</h6>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Company Name</label>
+                        {{ form.company_name }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Registration Number</label>
+                        {{ form.registration_number }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Tax ID</label>
+                        {{ form.tax_id }}
+                    </div>
+                </div>
+            </div>
+            
+            <div id="individual_fields">
+                <h6 class="text-muted mb-3">Personal Information</h6>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">First Name</label>
+                        {{ form.first_name }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Last Name</label>
+                        {{ form.last_name }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">National ID</label>
+                        {{ form.national_id }}
+                    </div>
+                </div>
+            </div>
+            
+            <hr>
+            <h6 class="text-muted mb-3">Contact Information</h6>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Email</label>
+                    {{ form.email }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Phone</label>
+                    {{ form.phone }}
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Address</label>
+                    {{ form.address }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">City</label>
+                    {{ form.city }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Country</label>
+                    {{ form.country }}
+                </div>
+            </div>
+            
+            <div class="mt-4 d-flex justify-content-end gap-2">
+                <a href="{% url 'rentals:tenant_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle me-1"></i>{% if form.instance.pk %}Update{% else %}Register{% endif %} Tenant
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tenantType = document.querySelector('[name="tenant_type"]');
+    const companyFields = document.getElementById('company_fields');
+    const individualFields = document.getElementById('individual_fields');
+    
+    function toggle() {
+        companyFields.style.display = tenantType.value === 'company' ? 'block' : 'none';
+        individualFields.style.display = tenantType.value === 'individual' ? 'block' : 'none';
+    }
+    
+    tenantType.addEventListener('change', toggle);
+    toggle();
+});
+</script>
+{% endblock %}

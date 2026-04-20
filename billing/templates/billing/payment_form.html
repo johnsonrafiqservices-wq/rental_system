@@ -1,0 +1,76 @@
+{% extends 'rentals/base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0"><i class="bi bi-cash-stack me-2"></i>{{ title }}</h4>
+    <a href="{% url 'billing:payment_list' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Back
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="post" action="{% url 'billing:payment_create' %}" novalidate>
+            {% csrf_token %}
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Invoice</label>
+                    {{ form.invoice }}
+                    {% if form.invoice.errors %}<div class="text-danger small mt-1">{{ form.invoice.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Payment Date</label>
+                    {{ form.payment_date }}
+                    {% if form.payment_date.errors %}<div class="text-danger small mt-1">{{ form.payment_date.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Status</label>
+                    {{ form.status }}
+                </div>
+            </div>
+
+            <hr class="my-4">
+            <h6 class="mb-3 text-muted">Payment Details</h6>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Amount</label>
+                    {{ form.amount }}
+                    {% if form.amount.errors %}<div class="text-danger small mt-1">{{ form.amount.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Currency</label>
+                    {{ form.currency }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Payment Method</label>
+                    {{ form.payment_method }}
+                </div>
+            </div>
+
+            <div class="row g-3 mt-1">
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Reference / Transaction ID</label>
+                    {{ form.reference }}
+                </div>
+            </div>
+
+            <div class="row g-3 mt-1">
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Notes</label>
+                    {{ form.notes }}
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-check-circle me-1"></i>Record Payment
+                </button>
+                <a href="{% url 'billing:payment_list' %}" class="btn btn-outline-secondary ms-2">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

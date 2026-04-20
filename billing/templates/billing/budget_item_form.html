@@ -1,0 +1,43 @@
+{% extends 'rentals/base.html' %}
+
+{% block title %}Add Budget Item{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+                <div class="card-header bg-white py-3" style="border-radius: 12px 12px 0 0;">
+                    <h5 class="mb-0 fw-bold" style="color: #0f172a;">Add Budget Item</h5>
+                    <small class="text-muted">for {{ budget.name }}</small>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Category</label>
+                            {{ form.category }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Description</label>
+                            {{ form.description }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Amount</label>
+                            {{ form.amount }}
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'billing:budget_detail' budget.pk %}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-success">Add Item</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,352 @@
+{% extends 'rentals/base.html' %}
+
+{% block title %}{{ owner.name }} - Rental Management{% endblock %}
+
+{% block content %}
+<!-- Profile Header -->
+<div class="profile-header">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+        <div class="d-flex align-items-start gap-3">
+            <div class="profile-avatar" style="background:linear-gradient(135deg,{% if owner.owner_type == 'company' %}#2563eb,#1d4ed8{% else %}#6366f1,#4f46e5{% endif %});">
+                <i class="bi {% if owner.owner_type == 'company' %}bi-building{% else %}bi-person{% endif %}"></i>
+            </div>
+            <div>
+                <div class="profile-name">{{ owner.name }}</div>
+                <div class="profile-meta mb-2">
+                    <span><i class="bi bi-tag me-1"></i>{{ owner.get_owner_type_display }}</span>
+                    {% if owner.city %}<span><i class="bi bi-geo-alt me-1"></i>{{ owner.city }}{% if owner.country %}, {{ owner.country }}{% endif %}</span>{% endif %}
+                    {% if owner.phone %}<span><i class="bi bi-telephone me-1"></i>{{ owner.phone }}</span>{% endif %}
+                    <span><i class="bi bi-building me-1"></i>{{ owner.property_count }} properties</span>
+                </div>
+                {% if owner.qr_code_image %}
+                <img src="{{ owner.qr_code_image.url }}" alt="QR" style="width:70px;height:70px;object-fit:contain;" class="me-2">
+                {% endif %}
+                <small class="text-muted">{{ owner.pk }}</small>
+            </div>
+        </div>
+        <div class="text-end">
+            <span class="badge {% if owner.owner_type == 'company' %}bg-primary{% else %}bg-info{% endif %}" style="font-size:0.9rem;padding:0.4rem 1rem;border-radius:20px;">
+                {{ owner.get_owner_type_display }}
+            </span>
+            <small class="text-muted d-block mt-1">Added {{ owner.created_at|date:"M d, Y" }}</small>
+        </div>
+    </div>
+    <div class="profile-actions mt-3 d-flex flex-wrap gap-2">
+        <a href="{% url 'rentals:rental_create' %}?tenant={{ owner.pk }}" class="btn btn-warning btn-sm">
+            <i class="bi bi-file-contract me-1"></i>Create Rental
+        </a>
+        {% if owner.qr_code_image %}
+        <a href="{{ owner.qr_code_image.url }}" download="owner_{{ owner.pk }}_qr.png" class="btn btn-success btn-sm">
+            <i class="bi bi-qr-code me-1"></i>Download QR
+        </a>
+        {% endif %}
+        <a href="{% url 'rentals:owner_list' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Back to Owners
+        </a>
+    </div>
+</div>
+
+<!-- Tab Navigation -->
+<ul class="nav nav-tabs-custom nav-tabs" id="ownerTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button">
+            <i class="bi bi-grid"></i>Overview
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="properties-tab" data-bs-toggle="tab" data-bs-target="#propertiesinfo" type="button">
+            <i class="bi bi-building"></i>Properties
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="rentals-tab" data-bs-toggle="tab" data-bs-target="#rentalsinfo" type="button">
+            <i class="bi bi-file-earmark-text"></i>Rentals
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="payments-tab" data-bs-toggle="tab" data-bs-target="#paymentsinfo" type="button">
+            <i class="bi bi-credit-card"></i>Payments
+        </button>
+    </li>
+    {% if owner.qr_code_image %}
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="qrcode-tab" data-bs-toggle="tab" data-bs-target="#qrcodeinfo" type="button">
+            <i class="bi bi-qr-code"></i>QR Code
+        </button>
+    </li>
+    {% endif %}
+</ul>
+
+<!-- Tab Content -->
+<div class="tab-content" id="ownerTabsContent">
+
+    <!-- Overview Tab -->
+    <div class="tab-pane fade show active" id="overview" role="tabpanel">
+        <div class="tab-section" style="padding: 1rem;">
+            <div class="tab-section-header" style="margin-bottom: 0.75rem; padding-bottom: 0.5rem;">
+                <h6 class="mb-0" style="font-size: 0.85rem; color: #3B6FE8; text-transform: uppercase; letter-spacing: 0.05em;">{% if owner.owner_type == 'company' %}Company Details{% else %}Personal Details{% endif %}</h6>
+            </div>
+            <div class="sub-section" style="margin-bottom: 1rem;">
+                <div class="sub-section-title" style="font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; font-weight: 600;">Identity</div>
+                <div class="row g-2">
+                {% if owner.owner_type == 'company' %}
+                    <div class="col-md-4">
+                        <div class="detail-info" style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                            <i class="bi bi-building" style="color: #3B6FE8; font-size: 0.9rem; margin-top: 0.1rem;"></i>
+                            <div><div class="d-val" style="font-size: 0.85rem; color: #0f172a; font-weight: 500;">{{ owner.company_name|default:"-" }}</div><div class="d-lbl" style="font-size: 0.7rem; color: #94a3b8;">Company Name</div></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="detail-info" style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                            <i class="bi bi-hash" style="color: #3B6FE8; font-size: 0.9rem; margin-top: 0.1rem;"></i>
+                            <div><div class="d-val" style="font-size: 0.85rem; color: #0f172a; font-weight: 500;">{{ owner.registration_number|default:"-" }}</div><div class="d-lbl" style="font-size: 0.7rem; color: #94a3b8;">Registration Number</div></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="detail-info" style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                            <i class="bi bi-file-earmark-text" style="color: #3B6FE8; font-size: 0.9rem; margin-top: 0.1rem;"></i>
+                            <div><div class="d-val" style="font-size: 0.85rem; color: #0f172a; font-weight: 500;">{{ owner.tax_id|default:"-" }}</div><div class="d-lbl" style="font-size: 0.7rem; color: #94a3b8;">Tax ID</div></div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="col-md-4">
+                        <div class="detail-info" style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                            <i class="bi bi-person" style="color: #3B6FE8; font-size: 0.9rem; margin-top: 0.1rem;"></i>
+                            <div><div class="d-val" style="font-size: 0.85rem; color: #0f172a; font-weight: 500;">{{ owner.first_name|default:"-" }}</div><div class="d-lbl" style="font-size: 0.7rem; color: #94a3b8;">First Name</div></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="detail-info" style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                            <i class="bi bi-person" style="color: #3B6FE8; font-size: 0.9rem; margin-top: 0.1rem;"></i>
+                            <div><div class="d-val" style="font-size: 0.85rem; color: #0f172a; font-weight: 500;">{{ owner.last_name|default:"-" }}</div><div class="d-lbl" style="font-size: 0.7rem; color: #94a3b8;">Last Name</div></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="detail-info" style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                            <i class="bi bi-card-text" style="color: #3B6FE8; font-size: 0.9rem; margin-top: 0.1rem;"></i>
+                            <div><div class="d-val" style="font-size: 0.85rem; color: #0f172a; font-weight: 500;">{{ owner.national_id|default:"-" }}</div><div class="d-lbl" style="font-size: 0.7rem; color: #94a3b8;">National ID</div></div>
+                        </div>
+                    </div>
+                {% endif %}
+                </div>
+            </div>
+            <div class="sub-section">
+                <div class="sub-section-title" style="font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; font-weight: 600;">Contact Information</div>
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        <div class="detail-info" style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                            <i class="bi bi-envelope" style="color: #3B6FE8; font-size: 0.9rem; margin-top: 0.1rem;"></i>
+                            <div><div class="d-val" style="font-size: 0.85rem; color: #0f172a; font-weight: 500;">{{ owner.email|default:"Not provided" }}</div><div class="d-lbl" style="font-size: 0.7rem; color: #94a3b8;">Email</div></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="detail-info" style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                            <i class="bi bi-telephone" style="color: #3B6FE8; font-size: 0.9rem; margin-top: 0.1rem;"></i>
+                            <div><div class="d-val" style="font-size: 0.85rem; color: #0f172a; font-weight: 500;">{{ owner.phone|default:"Not provided" }}</div><div class="d-lbl" style="font-size: 0.7rem; color: #94a3b8;">Phone</div></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="detail-info" style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                            <i class="bi bi-geo-alt" style="color: #3B6FE8; font-size: 0.9rem; margin-top: 0.1rem;"></i>
+                            <div><div class="d-val" style="font-size: 0.85rem; color: #0f172a; font-weight: 500;">{{ owner.address|default:"Not provided" }}</div><div class="d-lbl" style="font-size: 0.7rem; color: #94a3b8;">Address</div></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="detail-info" style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                            <i class="bi bi-pin-map" style="color: #3B6FE8; font-size: 0.9rem; margin-top: 0.1rem;"></i>
+                            <div><div class="d-val" style="font-size: 0.85rem; color: #0f172a; font-weight: 500;">{{ owner.city|default:"-" }}</div><div class="d-lbl" style="font-size: 0.7rem; color: #94a3b8;">City</div></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="detail-info" style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                            <i class="bi bi-globe" style="color: #3B6FE8; font-size: 0.9rem; margin-top: 0.1rem;"></i>
+                            <div><div class="d-val" style="font-size: 0.85rem; color: #0f172a; font-weight: 500;">{{ owner.country|default:"-" }}</div><div class="d-lbl" style="font-size: 0.7rem; color: #94a3b8;">Country</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Properties Tab -->
+    <div class="tab-pane fade" id="propertiesinfo" role="tabpanel">
+        <div class="tab-section">
+            <div class="tab-section-header">
+                <h6 class="mb-0">Properties ({{ owner.property_count }})</h6>
+                <a href="#" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#propertyCreateModal" style="font-size:0.78rem;">
+                    <i class="bi bi-plus me-1"></i>Add Property
+                </a>
+            </div>
+            {% if properties %}
+            {% for property in properties %}
+            <a href="{% url 'rentals:property_detail' property.pk %}" class="d-flex align-items-center justify-content-between py-2 text-decoration-none {% if not forloop.last %}border-bottom{% endif %}">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:36px;height:36px;background:#e0f2fe;">
+                        <i class="bi bi-building" style="color:#0369a1;font-size:0.9rem;"></i>
+                    </div>
+                    <div>
+                        <div style="font-size:0.9rem;font-weight:500;color:#1e293b;">{{ property.name }}</div>
+                        <div style="font-size:0.78rem;color:#94a3b8;">{{ property.city }} &bull; {{ property.get_property_type_display }}</div>
+                    </div>
+                </div>
+                <span class="badge {% if property.is_available %}bg-success{% else %}bg-warning text-dark{% endif %}" style="font-size:0.72rem;">
+                    {% if property.is_available %}Available{% else %}Rented{% endif %}
+                </span>
+            </a>
+            {% endfor %}
+            {% else %}
+            <div class="text-center py-4">
+                <i class="bi bi-building" style="font-size:2rem;color:#cbd5e1;"></i>
+                <p class="text-muted mt-2 mb-0" style="font-size:0.88rem;">No properties registered yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Rentals Tab -->
+    <div class="tab-pane fade" id="rentalsinfo" role="tabpanel">
+        <div class="tab-section">
+            <div class="tab-section-header">
+                <h6 class="mb-0">Rentals on Owner's Properties ({{ property_rentals|length }})</h6>
+            </div>
+            {% if property_rentals %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" style="font-size:0.88rem;">
+                    <thead>
+                        <tr class="text-muted" style="font-size:0.78rem;">
+                            <th>Rental ID</th>
+                            <th>Property</th>
+                            <th>Tenant</th>
+                            <th>Period</th>
+                            <th>Monthly Rent</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for rental in property_rentals %}
+                        <tr>
+                            <td>
+                                <code style="font-size:0.75rem;background:#f1f5f9;padding:2px 6px;border-radius:4px;">{{ rental.pk }}</code>
+                            </td>
+                            <td>
+                                <a href="{% url 'rentals:property_detail' rental.property_obj.pk %}" class="text-decoration-none fw-medium">
+                                    {{ rental.property_obj.name }}
+                                </a>
+                            </td>
+                            <td>
+                                {% if rental.tenant %}
+                                <a href="{% url 'rentals:tenant_detail' rental.tenant.pk %}" class="text-decoration-none">
+                                    {{ rental.tenant.name }}
+                                </a>
+                                {% else %}
+                                <span class="text-muted">No tenant</span>
+                                {% endif %}
+                            </td>
+                            <td style="font-size:0.82rem;">{{ rental.start_date|date:"M d, Y" }} &mdash; {{ rental.end_date|date:"M d, Y" }}</td>
+                            <td class="fw-medium">{{ rental.currency }} {{ rental.monthly_rent|floatformat:0 }}</td>
+                            <td>
+                                <span class="badge {% if rental.status == 'active' %}bg-success{% elif rental.status == 'pending' %}bg-warning text-dark{% elif rental.status == 'expired' %}bg-secondary{% else %}bg-danger{% endif %}" style="font-size:0.72rem;">
+                                    {{ rental.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{% url 'rentals:rental_detail' rental.pk %}" class="btn btn-sm btn-outline-primary" style="font-size:0.75rem;">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <i class="bi bi-file-earmark-text" style="font-size:2rem;color:#cbd5e1;"></i>
+                <p class="text-muted mt-2 mb-0" style="font-size:0.88rem;">No rentals found on this owner's properties.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Payments Tab -->
+    <div class="tab-pane fade" id="paymentsinfo" role="tabpanel">
+        <div class="tab-section">
+            <div class="tab-section-header">
+                <h6 class="mb-0">Payment History ({{ payments|length }})</h6>
+            </div>
+            {% if payments %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" style="font-size:0.88rem;">
+                    <thead>
+                        <tr class="text-muted" style="font-size:0.78rem;">
+                            <th>Receipt #</th>
+                            <th>Property</th>
+                            <th>Tenant</th>
+                            <th>Amount</th>
+                            <th>Method</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in payments %}
+                        <tr>
+                            <td>
+                                <a href="{{ payment.get_absolute_url }}" class="text-decoration-none fw-medium">{{ payment.receipt_number }}</a>
+                            </td>
+                            <td>
+                                <a href="{% url 'rentals:property_detail' payment.invoice.rental.property_obj.pk %}" class="text-decoration-none">
+                                    {{ payment.invoice.rental.property_obj.name }}
+                                </a>
+                            </td>
+                            <td>
+                                {% if payment.invoice.rental.tenant %}
+                                <a href="{% url 'rentals:tenant_detail' payment.invoice.rental.tenant.pk %}" class="text-decoration-none">
+                                    {{ payment.invoice.rental.tenant.name }}
+                                </a>
+                                {% else %}
+                                <span class="text-muted">No tenant</span>
+                                {% endif %}
+                            </td>
+                            <td class="fw-medium">{{ payment.currency }} {{ payment.amount|floatformat:0 }}</td>
+                            <td>
+                                <span class="badge bg-light text-dark" style="font-size:0.72rem;">{{ payment.get_payment_method_display }}</span>
+                            </td>
+                            <td style="font-size:0.82rem;">{{ payment.payment_date|date:"M d, Y" }}</td>
+                            <td>
+                                <span class="badge {% if payment.status == 'completed' %}bg-success{% elif payment.status == 'pending' %}bg-warning text-dark{% elif payment.status == 'refunded' %}bg-info{% else %}bg-danger{% endif %}" style="font-size:0.72rem;">
+                                    {{ payment.get_status_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <i class="bi bi-credit-card" style="font-size:2rem;color:#cbd5e1;"></i>
+                <p class="text-muted mt-2 mb-0" style="font-size:0.88rem;">No payment records found.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if owner.qr_code_image %}
+    <!-- QR Code Tab -->
+    <div class="tab-pane fade" id="qrcodeinfo" role="tabpanel">
+        <div class="tab-section text-center">
+            <div class="tab-section-header justify-content-center">
+                <h6 class="mb-0">QR Code</h6>
+            </div>
+            <img src="{{ owner.qr_code_image.url }}" alt="QR Code" style="width:180px;height:180px;object-fit:contain;" class="mb-3">
+            <p class="text-muted mb-3" style="font-size:0.85rem;">Scan to view owner details</p>
+            <a href="{{ owner.qr_code_image.url }}" download="owner_{{ owner.pk }}_qr.png" class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-download me-1"></i>Download QR Code
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

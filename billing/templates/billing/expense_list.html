@@ -1,0 +1,238 @@
+{% extends 'rentals/base.html' %}
+
+{% block title %}Expenses{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0 fw-800" style="color: #0f172a;"><i class="bi bi-cash-coin me-2"></i>Expenses</h4>
+    <a href="{% url 'billing:expense_create' %}" class="btn btn-success btn-sm">
+        <i class="bi bi-plus-circle me-1"></i>Record Expense
+    </a>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4 border-0 shadow-sm" style="border-radius: 12px;">
+    <div class="card-body py-2">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-3">
+                <select name="status" class="form-select form-select-sm border-0" style="background: #f1f5f9;">
+                    <option value="">All Statuses</option>
+                    <option value="draft" {% if status == 'draft' %}selected{% endif %}>Draft</option>
+                    <option value="submitted" {% if status == 'submitted' %}selected{% endif %}>Submitted</option>
+                    <option value="approved" {% if status == 'approved' %}selected{% endif %}>Approved</option>
+                    <option value="paid" {% if status == 'paid' %}selected{% endif %}>Paid</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="category" class="form-select form-select-sm border-0" style="background: #f1f5f9;">
+                    <option value="">All Categories</option>
+                    <option value="maintenance" {% if category == 'maintenance' %}selected{% endif %}>Maintenance</option>
+                    <option value="utilities" {% if category == 'utilities' %}selected{% endif %}>Utilities</option>
+                    <option value="insurance" {% if category == 'insurance' %}selected{% endif %}>Insurance</option>
+                    <option value="taxes" {% if category == 'taxes' %}selected{% endif %}>Taxes</option>
+                    <option value="marketing" {% if category == 'marketing' %}selected{% endif %}>Marketing</option>
+                    <option value="salaries" {% if category == 'salaries' %}selected{% endif %}>Salaries</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <input type="date" name="date_from" class="form-control form-control-sm border-0" style="background: #f1f5f9;" value="{{ date_from }}" placeholder="From">
+            </div>
+            <div class="col-md-2">
+                <input type="date" name="date_to" class="form-control form-control-sm border-0" style="background: #f1f5f9;" value="{{ date_to }}" placeholder="To">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-sm btn-primary w-100"><i class="bi bi-search me-1"></i>Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Table -->
+<div class="card border-0 shadow-sm" style="border-radius: 12px; overflow: hidden;">
+    <div class="card-body p-0">
+        {% if page_obj.object_list %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 compact-table">
+                <thead>
+                    <tr>
+                        <th class="ps-3">Expense #</th>
+                        <th>Description</th>
+                        <th>Category</th>
+                        <th>Property</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th class="pe-3 text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for exp in page_obj %}
+                    <tr class="compact-row">
+                        <td class="ps-3">
+                            <a href="{% url 'billing:expense_detail' exp.pk %}" class="compact-title">{{ exp.expense_number }}</a>
+                        </td>
+                        <td class="compact-location">{{ exp.description|truncatechars:30 }}</td>
+                        <td>
+                            {% if exp.budget_item %}
+                            <span class="compact-type">{{ exp.budget_item.get_category_display }}</span>
+                            {% else %}-{% endif %}
+                        </td>
+                        <td class="compact-views">
+                            {% if exp.property_obj %}{{ exp.property_obj.name|truncatechars:20 }}{% else %}-{% endif %}
+                        </td>
+                        <td class="compact-price">{{ exp.currency }} {{ exp.amount|floatformat:0 }}</td>
+                        <td class="compact-views">{{ exp.expense_date|date:"d M Y" }}</td>
+                        <td>
+                            <span class="compact-status {% if exp.status == 'paid' %}active{% elif exp.status == 'approved' %}sent{% elif exp.status == 'draft' %}pending{% else %}inactive{% endif %}">
+                                <i class="bi bi-circle-fill"></i>{{ exp.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="pe-3 text-end">
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light dropdown-toggle compact-action-btn" type="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="{% url 'billing:expense_detail' exp.pk %}"><i class="bi bi-eye me-2"></i>View</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'billing:expense_edit' exp.pk %}"><i class="bi bi-pencil me-2"></i>Edit</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-cash-coin" style="font-size:3rem;color:#cbd5e1;"></i>
+            <p class="text-muted mt-2">No expenses found. Record your first expense to start tracking.</p>
+            <a href="{% url 'billing:expense_create' %}" class="btn btn-success btn-sm">Record Expense</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if page_obj.has_other_pages %}
+<nav class="mt-3">
+    <ul class="pagination pagination-sm justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&status={{ status }}&category={{ category }}">&laquo;</a></li>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+            <a class="page-link" href="?page={{ num }}&status={{ status }}&category={{ category }}">{{ num }}</a>
+        </li>
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&status={{ status }}&category={{ category }}">&raquo;</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+<style>
+    .compact-table {
+        font-size: 0.85rem;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    .compact-table thead th {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 0.75rem 0.5rem;
+        border-bottom: 1px solid #e2e8f0;
+        background: #f8fafc;
+        white-space: nowrap;
+    }
+    .compact-table tbody tr {
+        border-bottom: 1px solid #f1f5f9;
+        transition: background-color 0.15s;
+    }
+    .compact-table tbody tr:hover {
+        background-color: #f8fafc;
+    }
+    .compact-table tbody td {
+        padding: 0.6rem 0.5rem;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+    .compact-title {
+        font-weight: 500;
+        color: #0f172a;
+        text-decoration: none;
+        font-size: 0.85rem;
+    }
+    .compact-title:hover {
+        color: #3B6FE8;
+    }
+    .compact-type {
+        font-size: 0.75rem;
+        color: #64748b;
+        background: #f1f5f9;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-weight: 500;
+    }
+    .compact-location {
+        font-size: 0.8rem;
+        color: #64748b;
+    }
+    .compact-price {
+        font-weight: 600;
+        color: #3B6FE8;
+        font-size: 0.85rem;
+    }
+    .compact-views {
+        font-size: 0.8rem;
+        color: #94a3b8;
+    }
+    .compact-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        padding: 2px 8px;
+        border-radius: 12px;
+        background: #f1f5f9;
+        color: #64748b;
+    }
+    .compact-status i {
+        font-size: 0.5rem;
+    }
+    .compact-status.active {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+    .compact-status.sent {
+        background: #dbeafe;
+        color: #3B6FE8;
+    }
+    .compact-status.pending {
+        background: #fef3c7;
+        color: #f59e0b;
+    }
+    .compact-status.inactive {
+        background: #f1f5f9;
+        color: #64748b;
+    }
+    .compact-action-btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+        color: #64748b;
+        background: transparent;
+        border: none;
+    }
+    .compact-action-btn:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+    }
+    .compact-action-btn::after {
+        display: none;
+    }
+</style>
+{% endblock %}

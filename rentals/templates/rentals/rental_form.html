@@ -1,0 +1,146 @@
+{% extends 'rentals/base.html' %}
+
+{% block title %}{% if editing %}Edit Rental {{ rental.rental_number }}{% else %}Register Rental{% endif %} - Rental Management{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col-12">
+        {% if editing %}
+        <h4 class="mb-2"><i class="bi bi-pencil-square me-2"></i>Edit Rental <code style="font-size:0.85rem;">{{ rental.rental_number }}</code></h4>
+        <p class="text-muted mb-3" style="font-size:0.88rem;">
+            <i class="bi bi-info-circle me-1"></i>
+            Update the details for this rental. Tenant assignment is managed from the rental detail page.
+        </p>
+        <a href="{% url 'rentals:rental_detail' rental.pk %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Back to Rental
+        </a>
+        {% else %}
+        <h4 class="mb-2"><i class="bi bi-file-contract me-2"></i>Register Rental</h4>
+        <p class="text-muted mb-3" style="font-size:0.88rem;">
+            <i class="bi bi-info-circle me-1"></i>
+            Register a rental linked to a property. You can assign a tenant later from the rental detail page.
+        </p>
+        <a href="{% url 'rentals:rental_list' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Back to Rentals
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-body p-4">
+                <form method="post" action="{% if editing %}{% url 'rentals:rental_edit' rental.pk %}{% else %}{% url 'rentals:rental_create' %}{% endif %}">
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Rental Name -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-12">
+                            {% if form.name.errors %}<div class="text-danger small mb-1">{{ form.name.errors }}</div>{% endif %}
+                            <label class="form-label fw-semibold">Rental Name <span class="text-muted fw-normal">(optional)</span></label>
+                            {{ form.name }}
+                            <div class="form-text">A short label to identify this rental, e.g. "Unit 4A – Ground Floor"</div>
+                        </div>
+                    </div>
+
+                    <!-- Property & Status -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-8">
+                            {% if form.property_obj.errors %}<div class="text-danger small mb-1">{{ form.property_obj.errors }}</div>{% endif %}
+                            <label class="form-label fw-semibold">Property <span class="text-danger">*</span></label>
+                            {{ form.property_obj }}
+                        </div>
+                        <div class="col-md-4">
+                            {% if form.status.errors %}<div class="text-danger small mb-1">{{ form.status.errors }}</div>{% endif %}
+                            <label class="form-label fw-semibold">Status</label>
+                            {{ form.status }}
+                        </div>
+                    </div>
+
+                    <!-- Financial Terms -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            {% if form.monthly_rent.errors %}<div class="text-danger small mb-1">{{ form.monthly_rent.errors }}</div>{% endif %}
+                            <label class="form-label fw-semibold">Rent Amount <span class="text-danger">*</span></label>
+                            {{ form.monthly_rent }}
+                        </div>
+                        <div class="col-md-4">
+                            {% if form.currency.errors %}<div class="text-danger small mb-1">{{ form.currency.errors }}</div>{% endif %}
+                            <label class="form-label fw-semibold">Currency</label>
+                            {{ form.currency }}
+                        </div>
+                        <div class="col-md-4">
+                            {% if form.payment_frequency.errors %}<div class="text-danger small mb-1">{{ form.payment_frequency.errors }}</div>{% endif %}
+                            <label class="form-label fw-semibold">Payment Frequency</label>
+                            {{ form.payment_frequency }}
+                        </div>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            {% if form.deposit_amount.errors %}<div class="text-danger small mb-1">{{ form.deposit_amount.errors }}</div>{% endif %}
+                            <label class="form-label fw-semibold">Security Deposit</label>
+                            {{ form.deposit_amount }}
+                        </div>
+                    </div>
+
+                    <!-- Room Details -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            {% if form.number_of_rooms.errors %}<div class="text-danger small mb-1">{{ form.number_of_rooms.errors }}</div>{% endif %}
+                            <label class="form-label fw-semibold">Rooms</label>
+                            {{ form.number_of_rooms }}
+                        </div>
+                        <div class="col-md-4">
+                            {% if form.number_of_bathrooms.errors %}<div class="text-danger small mb-1">{{ form.number_of_bathrooms.errors }}</div>{% endif %}
+                            <label class="form-label fw-semibold">Bathrooms</label>
+                            {{ form.number_of_bathrooms }}
+                        </div>
+                        <div class="col-md-4">
+                            {% if form.floor_number.errors %}<div class="text-danger small mb-1">{{ form.floor_number.errors }}</div>{% endif %}
+                            <label class="form-label fw-semibold">Floor</label>
+                            {{ form.floor_number }}
+                        </div>
+                    </div>
+
+                    <!-- Terms & Notes -->
+                    <div class="mb-3">
+                        {% if form.terms.errors %}<div class="text-danger small mb-1">{{ form.terms.errors }}</div>{% endif %}
+                        <label class="form-label fw-semibold">Terms</label>
+                        {{ form.terms }}
+                    </div>
+                    <div class="mb-4">
+                        {% if form.notes.errors %}<div class="text-danger small mb-1">{{ form.notes.errors }}</div>{% endif %}
+                        <label class="form-label fw-semibold">Notes</label>
+                        {{ form.notes }}
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        {% if editing %}
+                        <a href="{% url 'rentals:rental_detail' rental.pk %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x me-1"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="bi bi-check-circle me-1"></i>Save Changes
+                        </button>
+                        {% else %}
+                        <a href="{% url 'rentals:rental_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x me-1"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-1"></i>Register Rental
+                        </button>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

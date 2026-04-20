@@ -1,0 +1,773 @@
+{% extends 'marketplace/base.html' %}
+{% block title %}{{ listing.title }} — RoomFinder{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detail-hero {
+        background: #fff;
+        padding: 1rem 0;
+        margin-bottom: 0.75rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        border: 1px solid #e5e7eb;
+    }
+    .detail-hero .hero-title {
+        font-size: 1.8rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1.2;
+    }
+    .detail-hero .hero-tags .badge {
+        font-size: 0.68rem;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+    .detail-hero .hero-price {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #3B6FE8;
+        line-height: 1;
+    }
+    .detail-hero .hero-price small {
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: #64748b;
+    }
+    .detail-hero .hero-location {
+        font-size: 0.82rem;
+        color: #64748b;
+        font-weight: 500;
+    }
+    .hero-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.35rem 0.75rem;
+        background: #f1f5f9;
+        border-radius: 0.375rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #374151;
+        margin-right: 0.5rem;
+    }
+    .hero-tag.available {
+        background: #dcfce7;
+        color: #166534;
+    }
+    .hero-tag.bills {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+    .photo-gallery {
+        border-radius: 0.5rem;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .photo-gallery img {
+        height: 350px;
+        object-fit: cover;
+    }
+    .info-card {
+        background: #fff;
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        margin-bottom: 0.5rem;
+        border: 1px solid #e5e7eb;
+    }
+    .info-card h5 {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-bottom: 0.4rem;
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+    .amenity-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 0.5rem;
+    }
+    .amenity-item {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.5rem;
+        background: #f8fafc;
+        border-radius: 0.4rem;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: #374151;
+    }
+    .amenity-item i {
+        color: #3B6FE8;
+        font-size: 0.95rem;
+    }
+    .amenity-item.available {
+        background: #dcfce7;
+        color: #166534;
+    }
+    .amenity-item.available i {
+        color: #16a34a;
+    }
+    .amenity-item.unavailable {
+        background: #f1f5f9;
+        color: #6b7280;
+    }
+    .amenity-item.unavailable i {
+        color: #9ca3af;
+    }
+    .landlord-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    .landlord-card .avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        object-fit: cover;
+    }
+    .landlord-card .avatar-placeholder {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #667eea;
+    }
+    .qr-room-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    }
+    .qr-room-card .qr-image {
+        width: 140px;
+        height: 140px;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        background: #fff;
+        padding: 0.35rem;
+    }
+    .qr-room-card .qr-title {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #1f2937;
+    }
+    .qr-room-card .qr-subtitle {
+        font-size: 0.75rem;
+        color: #6b7280;
+        margin-bottom: 0.5rem;
+    }
+    .enquiry-card {
+        background: #fff;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        border: 2px solid #3B6FE8;
+    }
+    .map-placeholder {
+        background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+        border-radius: 0.5rem;
+        height: 180px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #4338ca;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+    }
+    .stat-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.35rem 0.75rem;
+        background: #f8fafc;
+        border-radius: 1.5rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #374151;
+        margin-right: 0.35rem;
+        margin-bottom: 0.35rem;
+    }
+    .stat-badge.primary {
+        background: #3B6FE8;
+        color: #fff;
+    }
+    .stat-badge.success {
+        background: #10b981;
+        color: #fff;
+    }
+    .table-custom th, .table-custom td {
+        padding: 0.5rem 0.75rem;
+        border-bottom: 1px solid #e5e7eb;
+        font-size: 0.85rem;
+    }
+    .table-custom tr:last-child th, .table-custom tr:last-child td {
+        border-bottom: none;
+    }
+    .table-custom td:first-child {
+        color: #6b7280;
+        font-weight: 500;
+    }
+    .table-custom td:last-child {
+        color: #1a1a2e;
+        font-weight: 600;
+    }
+    .quick-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+    .quick-action-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        font-size: 0.8rem;
+        transition: all 0.2s;
+    }
+    .quick-action-btn:hover {
+        transform: translateY(-2px);
+    }
+    .section-divider {
+        height: 2px;
+        background: linear-gradient(90deg, #3B6FE8 0%, #667eea 100%);
+        margin: 1rem 0;
+        border-radius: 2px;
+    }
+    .highlight-box {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border-radius: 0.5rem;
+        padding: 0.6rem;
+        margin-bottom: 0.75rem;
+        border-left: 3px solid #f59e0b;
+    }
+    .highlight-box p {
+        margin: 0;
+        font-size: 0.8rem;
+        color: #92400e;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 1rem;">
+
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb" style="font-size: 0.8rem; background: #fff; padding: 0.5rem 0.75rem; border-radius: 0.5rem;">
+            <li class="breadcrumb-item"><a href="{% url 'marketplace:home' %}" style="color:#3B6FE8;">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'marketplace:listing_list' %}" style="color:#3B6FE8;">Rooms</a></li>
+            <li class="breadcrumb-item active">{{ listing.title|truncatechars:40 }}</li>
+        </ol>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="detail-hero">
+        <div class="container">
+            <div class="row align-items-start">
+                <div class="col-lg-8">
+                    <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+                        <span class="hero-tag">
+                            <i class="bi bi-door-open"></i>
+                            {{ listing.get_room_type_display }}
+                        </span>
+                        <span class="hero-tag">
+                            <i class="bi bi-building"></i>
+                            {{ listing.get_property_type_display }}
+                        </span>
+                        {% if listing.status == 'active' %}
+                        <span class="hero-tag available">
+                            <i class="bi bi-check-circle-fill"></i>
+                            Available
+                        </span>
+                        {% else %}
+                        <span class="hero-tag" style="background: #f3f4f6; color: #6b7280;">
+                            {{ listing.get_status_display }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    <h1 class="hero-title">{{ listing.title }}</h1>
+                    <div class="d-flex align-items-center gap-2 text-muted hero-location" style="font-size: 0.82rem;">
+                        <i class="bi bi-geo-alt-fill" style="color: #3B6FE8;"></i>
+                        {{ listing.address }}, {{ listing.city }}{% if listing.postcode %} {{ listing.postcode }}{% endif %}
+                    </div>
+                </div>
+                <div class="col-lg-4 text-lg-end mt-2 mt-lg-0">
+                    <div class="hero-price">
+                        {{ listing.currency }} {{ listing.monthly_rent|floatformat:0 }}<small>/month</small>
+                    </div>
+                    {% if listing.bills_included %}
+                    <div>
+                        <span class="hero-tag bills">
+                            <i class="bi bi-check-circle-fill"></i>
+                            Bills Included
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+
+        <!-- ── Left: Photos + Details ── -->
+        <div class="col-lg-8">
+
+            <!-- Photo gallery -->
+            <div class="photo-gallery mb-3 position-relative">
+                {% if photos %}
+                <div id="photoCarousel" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        {% for photo in photos %}
+                        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                            <img src="{{ photo.image.url }}" class="d-block w-100" alt="{{ photo.caption|default:listing.title }}">
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% if photos.count > 1 %}
+                    <button class="carousel-control-prev" type="button" data-bs-target="#photoCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" style="background: rgba(0,0,0,0.5); border-radius: 50%; width: 36px; height: 36px;"></span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#photoCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" style="background: rgba(0,0,0,0.5); border-radius: 50%; width: 36px; height: 36px;"></span>
+                    </button>
+                    <div class="position-absolute bottom-0 start-0 end-0 m-2 d-flex justify-content-between align-items-end">
+                        <span class="badge bg-dark px-2 py-1" style="font-size: 0.75rem;">
+                            <i class="bi bi-images me-1"></i>{{ photos.count }} photo{{ photos.count|pluralize }}
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="d-flex align-items-center justify-content-center" style="height: 350px; background: #f1f5f9;">
+                    <div class="text-center text-muted">
+                        <i class="bi bi-house" style="font-size: 3rem; color: #cbd5e1;"></i>
+                        <p class="mt-2 mb-0" style="font-size: 0.9rem;">No photos uploaded</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="info-card">
+                <h5>Quick Overview</h5>
+                <div class="d-flex flex-wrap">
+                    <span class="stat-badge primary"><i class="bi bi-door-open"></i> {{ listing.get_room_type_display }}</span>
+                    <span class="stat-badge"><i class="bi bi-building"></i> {{ listing.get_property_type_display }}</span>
+                    <span class="stat-badge {% if listing.furnished %}success{% endif %}">
+                        <i class="bi bi-{% if listing.furnished %}check{% else %}x{% endif %}-circle"></i>
+                        {% if listing.furnished %}Furnished{% else %}Unfurnished{% endif %}
+                    </span>
+                    <span class="stat-badge"><i class="bi bi-people"></i> {{ listing.current_occupants }} flatmate{{ listing.current_occupants|pluralize }}</span>
+                    <span class="stat-badge"><i class="bi bi-calendar"></i> Available {% if listing.available_from <= today %}now{% else %}from {{ listing.available_from|date:"M d, Y" }}{% endif %}</span>
+                    <span class="stat-badge"><i class="bi bi-clock"></i> Min term: {{ listing.get_min_term_display }}</span>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="info-card">
+                <h5><i class="bi bi-info-circle me-2" style="color: #3B6FE8;"></i>About This {{ listing.get_property_type_display|default:"Property" }}</h5>
+                <div style="line-height: 1.5; color: #374151; font-size: 0.8rem; white-space: pre-line;">{{ listing.description }}</div>
+            </div>
+
+            <!-- Location Map Placeholder -->
+            <div class="map-placeholder">
+                <div class="text-center">
+                    <i class="bi bi-map" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                    <p style="font-size: 0.85rem; margin: 0;">{{ listing.address }}, {{ listing.city }} {{ listing.postcode }}</p>
+                    <small style="opacity: 0.7; font-size: 0.75rem;">Map integration coming soon</small>
+                </div>
+            </div>
+
+            <!-- Availability & Costs -->
+            <div class="row g-2 mb-3">
+                <div class="col-md-6">
+                    <div class="info-card h-100">
+                        <h5><i class="bi bi-calendar-check me-2" style="color: #3B6FE8;"></i>Availability</h5>
+                        <table class="table table-custom mb-0">
+                            <tbody>
+                                <tr>
+                                    <td>Available from</td>
+                                    <td>{% if listing.available_from <= today %}Available now{% else %}{{ listing.available_from|date:"M d, Y" }}{% endif %}</td>
+                                </tr>
+                                <tr>
+                                    <td>Minimum term</td>
+                                    <td>{{ listing.get_min_term_display }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Maximum term</td>
+                                    <td>{{ listing.get_max_term_display }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="info-card h-100">
+                        <h5><i class="bi bi-cash me-2" style="color: #3B6FE8;"></i>Costs</h5>
+                        <table class="table table-custom mb-0">
+                            <tbody>
+                                <tr>
+                                    <td>Monthly rent</td>
+                                    <td>{{ listing.currency|default:"KES" }} {{ listing.monthly_rent|floatformat:2 }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Deposit</td>
+                                    <td>{% if listing.deposit %}{{ listing.currency|default:"KES" }} {{ listing.deposit|floatformat:2 }}{% else %}—{% endif %}</td>
+                                </tr>
+                                <tr>
+                                    <td>Bills included</td>
+                                    <td>{% if listing.bills_included %}<span class="text-success"><i class="bi bi-check-circle-fill"></i> Yes</span>{% else %}<span class="text-muted">No</span>{% endif %}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Amenities -->
+            <div class="info-card">
+                <h5><i class="bi bi-stars me-2" style="color: #3B6FE8;"></i>Property Amenities</h5>
+                <div class="amenity-grid">
+                    <div class="amenity-item {% if listing.furnished %}available{% else %}unavailable{% endif %}">
+                        <i class="bi bi-{% if listing.furnished %}check-circle{% else %}x-circle{% endif %}"></i>
+                        Furnished
+                    </div>
+                    <div class="amenity-item {% if listing.has_parking %}available{% else %}unavailable{% endif %}">
+                        <i class="bi bi-{% if listing.has_parking %}check-circle{% else %}x-circle{% endif %}"></i>
+                        Parking
+                    </div>
+                    <div class="amenity-item {% if listing.has_garage %}available{% else %}unavailable{% endif %}">
+                        <i class="bi bi-{% if listing.has_garage %}check-circle{% else %}x-circle{% endif %}"></i>
+                        Garage
+                    </div>
+                    <div class="amenity-item {% if listing.has_garden %}available{% else %}unavailable{% endif %}">
+                        <i class="bi bi-{% if listing.has_garden %}check-circle{% else %}x-circle{% endif %}"></i>
+                        Garden
+                    </div>
+                    <div class="amenity-item {% if listing.has_balcony %}available{% else %}unavailable{% endif %}">
+                        <i class="bi bi-{% if listing.has_balcony %}check-circle{% else %}x-circle{% endif %}"></i>
+                        Balcony
+                    </div>
+                    <div class="amenity-item {% if listing.has_disabled_access %}available{% else %}unavailable{% endif %}">
+                        <i class="bi bi-{% if listing.has_disabled_access %}check-circle{% else %}x-circle{% endif %}"></i>
+                        Disabled Access
+                    </div>
+                    <div class="amenity-item {% if listing.has_living_room %}available{% else %}unavailable{% endif %}">
+                        <i class="bi bi-{% if listing.has_living_room %}check-circle{% else %}x-circle{% endif %}"></i>
+                        Living Room
+                    </div>
+                    <div class="amenity-item {% if listing.has_wifi %}available{% else %}unavailable{% endif %}">
+                        <i class="bi bi-{% if listing.has_wifi %}check-circle{% else %}x-circle{% endif %}"></i>
+                        Broadband/WiFi
+                    </div>
+                    <div class="amenity-item {% if listing.has_washing_machine %}available{% else %}unavailable{% endif %}">
+                        <i class="bi bi-{% if listing.has_washing_machine %}check-circle{% else %}x-circle{% endif %}"></i>
+                        Washing Machine
+                    </div>
+                    <div class="amenity-item {% if listing.has_dishwasher %}available{% else %}unavailable{% endif %}">
+                        <i class="bi bi-{% if listing.has_dishwasher %}check-circle{% else %}x-circle{% endif %}"></i>
+                        Dishwasher
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Household -->
+            <div class="info-card">
+                <h5><i class="bi bi-people-fill me-2" style="color: #3B6FE8;"></i>Current Household</h5>
+                <table class="table table-custom mb-0">
+                    <tbody>
+                        <tr>
+                            <td>Current flatmates</td>
+                            <td>{{ listing.current_occupants }} person{{ listing.current_occupants|pluralize }}</td>
+                        </tr>
+                        <tr>
+                            <td>Total rooms in property</td>
+                            <td>{{ listing.max_occupants }}</td>
+                        </tr>
+                        {% if listing.hh_min_age or listing.hh_max_age %}
+                        <tr>
+                            <td>Age range</td>
+                            <td>{% if listing.hh_min_age %}{{ listing.hh_min_age }}{% endif %}{% if listing.hh_min_age and listing.hh_max_age %} - {% endif %}{% if listing.hh_max_age %}{{ listing.hh_max_age }}{% endif %}</td>
+                        </tr>
+                        {% endif %}
+                        <tr>
+                            <td>Smokers in household</td>
+                            <td>{% if listing.hh_smoker %}<span class="text-warning">Yes</span>{% else %}<span class="text-success">No</span>{% endif %}</td>
+                        </tr>
+                        <tr>
+                            <td>Pets in household</td>
+                            <td>{% if listing.hh_pets %}<span class="text-warning">Yes</span>{% else %}<span class="text-success">No</span>{% endif %}</td>
+                        </tr>
+                        {% if listing.hh_occupation and listing.hh_occupation != 'any' %}
+                        <tr>
+                            <td>Occupation</td>
+                            <td>{{ listing.get_hh_occupation_display }}</td>
+                        </tr>
+                        {% endif %}
+                        {% if listing.hh_university %}
+                        <tr>
+                            <td>University</td>
+                            <td>{{ listing.hh_university }}</td>
+                        </tr>
+                        {% endif %}
+                        {% if listing.hh_gender and listing.hh_gender != 'any' %}
+                        <tr>
+                            <td>Gender preference</td>
+                            <td>{{ listing.get_hh_gender_display }}</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- New Flatmate Preferences -->
+            <div class="info-card">
+                <h5><i class="bi bi-person-plus me-2" style="color: #3B6FE8;"></i>Preferred Flatmate</h5>
+                <table class="table table-custom mb-0">
+                    <tbody>
+                        <tr>
+                            <td>Couples accepted</td>
+                            <td>{% if listing.couples_ok %}<span class="text-success"><i class="bi bi-check-circle-fill"></i> Yes</span>{% else %}<span class="text-muted">No</span>{% endif %}</td>
+                        </tr>
+                        <tr>
+                            <td>Smokers accepted</td>
+                            <td>{% if listing.smokers_ok %}<span class="text-success"><i class="bi bi-check-circle-fill"></i> Yes</span>{% else %}<span class="text-muted">No</span>{% endif %}</td>
+                        </tr>
+                        <tr>
+                            <td>Pets accepted</td>
+                            <td>{% if listing.pets_ok %}<span class="text-success"><i class="bi bi-check-circle-fill"></i> Yes</span>{% else %}<span class="text-muted">No</span>{% endif %}</td>
+                        </tr>
+                        <tr>
+                            <td>DSS/Housing benefit</td>
+                            <td>{% if listing.dss_ok %}<span class="text-success"><i class="bi bi-check-circle-fill"></i> Yes</span>{% else %}<span class="text-muted">No</span>{% endif %}</td>
+                        </tr>
+                        {% if listing.preferred_occupation and listing.preferred_occupation != 'any' %}
+                        <tr>
+                            <td>Preferred occupation</td>
+                            <td>{{ listing.get_preferred_occupation_display }}</td>
+                        </tr>
+                        {% endif %}
+                        <tr>
+                            <td>References required</td>
+                            <td>{% if listing.references_required %}<span class="text-warning">Yes</span>{% else %}<span class="text-success">No</span>{% endif %}</td>
+                        </tr>
+                        {% if listing.min_preferred_age or listing.max_preferred_age %}
+                        <tr>
+                            <td>Preferred age range</td>
+                            <td>{% if listing.min_preferred_age %}{{ listing.min_preferred_age }}{% endif %}{% if listing.min_preferred_age and listing.max_preferred_age %} - {% endif %}{% if listing.max_preferred_age %}{{ listing.max_preferred_age }}{% endif %}</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ── Right: Landlord + Enquiry ── -->
+        <div class="col-lg-4">
+            <div class="sticky-top" style="top: 60px;">
+
+                <!-- Landlord card -->
+                <div class="landlord-card mb-3">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        {% if listing.landlord.avatar %}
+                        <img src="{{ listing.landlord.avatar.url }}" class="avatar" alt="">
+                        {% else %}
+                        <div class="avatar-placeholder">
+                            {{ listing.landlord.display_name|first|upper }}
+                        </div>
+                        {% endif %}
+                        <div>
+                            <div class="fw-bold" style="font-size: 0.95rem;">{{ listing.landlord.display_name }}</div>
+                            <div style="font-size: 0.75rem; opacity: 0.9;">
+                                <i class="bi bi-shield-check me-1"></i>Verified Landlord
+                                {% if listing.landlord.city %}&middot; {{ listing.landlord.city }}{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div style="font-size: 0.75rem; opacity: 0.85;" class="mb-1">
+                        <i class="bi bi-clock me-1"></i>Listed {{ listing.created_at|timesince }} ago
+                        &nbsp;&middot;&nbsp;
+                        <i class="bi bi-eye me-1"></i>{{ listing.views_count }} views
+                    </div>
+                    {% if listing.landlord.phone %}
+                    <div style="font-size: 0.8rem;">
+                        <i class="bi bi-telephone me-1"></i>{{ listing.landlord.phone }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    {% if request.user.is_authenticated %}
+                    <button id="saveListingBtn" onclick="toggleSaveDetail()" class="quick-action-btn {% if is_saved %}btn-danger{% else %}btn-outline-danger{% endif %}">
+                        <i class="bi {% if is_saved %}bi-heart-fill{% else %}bi-heart{% endif %}" id="saveIcon"></i>
+                        <span id="saveLabel">{% if is_saved %}Saved{% else %}Save{% endif %}</span>
+                    </button>
+                    {% else %}
+                    <a href="{% url 'marketplace:login' %}?next={{ request.path }}" class="quick-action-btn btn-outline-danger">
+                        <i class="bi bi-heart"></i> Save
+                    </a>
+                    {% endif %}
+                    <a href="mailto:?subject=Check out this room on RoomFinder&body=I found this great room: {{ request.build_absolute_uri }}" class="quick-action-btn btn-outline-primary">
+                        <i class="bi bi-share"></i> Share
+                    </a>
+                </div>
+
+                <!-- Enquiry form -->
+                <div class="enquiry-card">
+                    <h5 class="fw-bold mb-2" style="font-size: 0.95rem;">
+                        <i class="bi bi-envelope-fill me-2" style="color: #3B6FE8;"></i>Contact Landlord
+                    </h5>
+
+                    {% if request.user.is_authenticated %}
+                    {% if listing.status == 'active' %}
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="send_enquiry" value="1">
+
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold" style="font-size: 0.8rem;">Your message</label>
+                            <textarea name="message" class="form-control" rows="3"
+                                placeholder="Hi, I'm interested in this room..." required
+                                style="font-size: 0.85rem; resize: none; border-radius: 0.4rem;">{{ enquiry_form.message.value|default:'' }}</textarea>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold" style="font-size: 0.8rem;">Phone number (optional)</label>
+                            <input type="text" name="sender_phone" class="form-control" style="font-size: 0.85rem; border-radius: 0.4rem;"
+                                placeholder="Your contact number" value="{{ enquiry_form.sender_phone.value|default:'' }}">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold" style="font-size: 0.8rem;">Preferred move-in date</label>
+                            <input type="date" name="move_in_date" class="form-control" style="font-size: 0.85rem; border-radius: 0.4rem;">
+                        </div>
+                        <button type="submit" class="btn w-100 fw-bold" style="background: linear-gradient(135deg, #3B6FE8 0%, #667eea 100%); color: #fff; border-radius: 0.4rem; padding: 0.5rem;">
+                            <i class="bi bi-send-fill me-2"></i>Send Enquiry
+                        </button>
+                    </form>
+                    {% else %}
+                    <div class="text-center py-3">
+                        <span class="badge bg-secondary px-3 py-1" style="font-size: 0.85rem; font-weight: 600;">{{ listing.get_status_display }}</span>
+                        <p class="text-muted mt-2 mb-0" style="font-size: 0.8rem;">This room is no longer available for enquiries.</p>
+                    </div>
+                    {% endif %}
+                    {% else %}
+                    <div class="highlight-box">
+                        <p><i class="bi bi-info-circle me-1"></i>Sign in to send an enquiry directly to the landlord.</p>
+                    </div>
+                    <a href="{% url 'marketplace:login' %}?next={{ request.path }}" class="btn w-100 fw-bold mb-2" style="background: linear-gradient(135deg, #3B6FE8 0%, #667eea 100%); color: #fff; border-radius: 0.4rem; padding: 0.5rem;">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                    </a>
+                    <div class="text-center" style="font-size: 0.75rem; color: #6b7280;">
+                        New to RoomFinder? <a href="{% url 'marketplace:register' %}" style="color: #3B6FE8; font-weight: 600;">Create free account</a>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Safety tips -->
+                <div class="info-card mt-3" style="background: #fef3c7; border-color: #fcd34d;">
+                    <h5 style="color: #92400e; margin-bottom: 0.4rem;"><i class="bi bi-shield-fill me-2"></i>Safety Tips</h5>
+                    <ul style="font-size: 0.75rem; color: #78350f; padding-left: 1rem; margin-bottom: 0; line-height: 1.4;">
+                        <li>Always view the property before paying</li>
+                        <li>Never send money without a signed agreement</li>
+                        <li>Verify the landlord's identity</li>
+                        <li>Meet in a public place for viewings</li>
+                    </ul>
+                </div>
+
+                {% if listing.qr_code_image %}
+                <div class="qr-room-card mt-3">
+                    <div class="qr-title"><i class="bi bi-qr-code-scan me-1" style="color:#3B6FE8;"></i>Scan Room QR</div>
+                    <div class="qr-subtitle">Scan to open this room directly</div>
+                    <div class="text-center mb-2">
+                        <img src="{{ listing.qr_code_image.url }}" alt="QR code for {{ listing.title }}" class="qr-image">
+                    </div>
+                    <div class="text-center">
+                        <a href="{{ listing.qr_code_image.url }}" download="{{ listing.title|slugify }}-qr.png" class="btn btn-outline-secondary btn-sm" style="font-size:0.74rem;">
+                            <i class="bi bi-download me-1"></i>Download QR
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Section Divider -->
+    <div class="section-divider"></div>
+
+    <!-- Other listings by same landlord -->
+    {% if other_listings %}
+    <div class="mb-4">
+        <h4 class="fw-bold mb-3" style="font-size: 1.1rem; color: #1a1a2e;">
+            <i class="bi bi-grid-fill me-2" style="color: #3B6FE8;"></i>More from this Landlord
+        </h4>
+        <div class="row g-3">
+            {% for r in other_listings %}
+            <div class="col-sm-6 col-md-4">
+                <a href="{% url 'marketplace:listing_detail' r.pk %}" class="listing-card d-block">
+                    <div class="listing-card-img">
+                        {% with r.primary_photo as photo %}
+                        {% if photo %}<img src="{{ photo.image.url }}" alt="{{ r.title }}">
+                        {% else %}<div class="w-100 d-flex align-items-center justify-content-center" style="height: 160px; background: #f1f5f9;"><i class="bi bi-house" style="font-size: 2rem; color: #cbd5e1;"></i></div>{% endif %}
+                        {% endwith %}
+                    </div>
+                    <div class="listing-card-body">
+                        <div class="listing-price">{{ r.currency|default:"KES" }} {{ r.monthly_rent|floatformat:0 }}<small>/mo</small></div>
+                        <div class="listing-title">{{ r.title }}</div>
+                        <div class="listing-location"><i class="bi bi-geo-alt me-1"></i>{{ r.city }}</div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleSaveDetail() {
+    fetch(`/marketplace/rooms/{{ listing.pk }}/save/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': '{{ csrf_token }}'},
+    })
+    .then(r => r.json())
+    .then(data => {
+        const btn = document.getElementById('saveListingBtn');
+        const icon = document.getElementById('saveIcon');
+        const label = document.getElementById('saveLabel');
+        if (data.saved) {
+            btn.classList.replace('btn-outline-danger', 'btn-danger');
+            icon.className = 'bi bi-heart-fill';
+            label.textContent = 'Saved';
+        } else {
+            btn.classList.replace('btn-danger', 'btn-outline-danger');
+            icon.className = 'bi bi-heart';
+            label.textContent = 'Save';
+        }
+    });
+}
+</script>
+{% endblock %}

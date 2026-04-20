@@ -1,0 +1,97 @@
+{% extends 'rentals/base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0"><i class="bi bi-receipt me-2"></i>{{ title }}</h4>
+    <a href="{% url 'billing:invoice_list' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Back
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="post" action="{% url 'billing:invoice_create' %}" novalidate>
+            {% csrf_token %}
+            
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Rental Agreement</label>
+                    {{ form.rental }}
+                    {% if form.rental.errors %}<div class="text-danger small mt-1">{{ form.rental.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Issue Date</label>
+                    {{ form.issue_date }}
+                    {% if form.issue_date.errors %}<div class="text-danger small mt-1">{{ form.issue_date.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Due Date</label>
+                    {{ form.due_date }}
+                    {% if form.due_date.errors %}<div class="text-danger small mt-1">{{ form.due_date.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+
+            <hr class="my-4">
+            <h6 class="mb-3 text-muted">Billing Period</h6>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Period Start</label>
+                    {{ form.period_start }}
+                    {% if form.period_start.errors %}<div class="text-danger small mt-1">{{ form.period_start.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Period End</label>
+                    {{ form.period_end }}
+                    {% if form.period_end.errors %}<div class="text-danger small mt-1">{{ form.period_end.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+
+            <hr class="my-4">
+            <h6 class="mb-3 text-muted">Amounts</h6>
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Rent Amount</label>
+                    {{ form.rent_amount }}
+                    {% if form.rent_amount.errors %}<div class="text-danger small mt-1">{{ form.rent_amount.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Tax</label>
+                    {{ form.tax_amount }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Additional Charges</label>
+                    {{ form.additional_charges }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Discount</label>
+                    {{ form.discount }}
+                </div>
+            </div>
+
+            <div class="row g-3 mt-1">
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Currency</label>
+                    {{ form.currency }}
+                </div>
+            </div>
+
+            <hr class="my-4">
+            <div class="row g-3">
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Notes</label>
+                    {{ form.notes }}
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle me-1"></i>{% if invoice %}Update Invoice{% else %}Create Invoice{% endif %}
+                </button>
+                <a href="{% url 'billing:invoice_list' %}" class="btn btn-outline-secondary ms-2">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

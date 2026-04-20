@@ -1,0 +1,237 @@
+{% extends 'rentals/base.html' %}
+
+{% block title %}Rentals - Rental Management{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="mb-1 fw-bold" style="color: #0f172a; font-size: 1.5rem;">
+            <i class="bi bi-file-contract me-2 text-primary"></i>Rentals
+        </h2>
+        <p class="text-muted mb-0" style="font-size: 0.85rem;">
+            {{ page_obj.paginator.count|default:0 }} rental agreements
+        </p>
+    </div>
+    <a href="{% url 'rentals:rental_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-2"></i>Create Rental
+    </a>
+</div>
+
+<!-- Filter Bar -->
+<div class="card border-0 shadow-sm mb-3" style="border-radius: 12px;">
+    <div class="card-body p-3">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-5">
+                <label class="form-label text-muted mb-1" style="font-size: 0.75rem; font-weight: 500;">Search</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0" style="border-radius: 8px 0 0 8px;">
+                        <i class="bi bi-search text-muted"></i>
+                    </span>
+                    <input type="text" class="form-control border-start-0 bg-light" name="search" placeholder="Property or tenant..." value="{{ search }}" style="border-radius: 0 8px 8px 0; font-size: 0.9rem;">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label text-muted mb-1" style="font-size: 0.75rem; font-weight: 500;">Status</label>
+                <select class="form-select bg-light" name="status" style="border-radius: 8px; font-size: 0.9rem;">
+                    <option value="">All Status</option>
+                    <option value="pending" {% if status == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="active" {% if status == 'active' %}selected{% endif %}>Active</option>
+                    <option value="expired" {% if status == 'expired' %}selected{% endif %}>Expired</option>
+                    <option value="terminated" {% if status == 'terminated' %}selected{% endif %}>Terminated</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-fill" style="border-radius: 8px;">
+                        <i class="bi bi-filter me-1"></i>Filter
+                    </button>
+                    <a href="{% url 'rentals:rental_list' %}" class="btn btn-outline-secondary" style="border-radius: 8px;">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </a>
+                    <div class="d-flex align-items-center gap-2 border-start ms-1 ps-2">
+                        <span class="text-muted d-none d-md-inline" style="font-size: 0.8rem;">View:</span>
+                        <button type="button" class="btn btn-sm view-toggle-btn active" id="gridViewBtn" onclick="toggleView('grid')" title="Grid View" style="border-radius: 8px; padding: 0.4rem 0.6rem;">
+                            <i class="bi bi-grid-fill"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm view-toggle-btn" id="listViewBtn" onclick="toggleView('list')" title="List View" style="border-radius: 8px; padding: 0.4rem 0.6rem;">
+                            <i class="bi bi-list"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if page_obj %}
+<!-- Grid View Container -->
+<div class="row g-3" id="gridViewContainer">
+    {% for rental in page_obj %}
+    <div class="col-sm-6 col-lg-4 col-xl-3">
+        <a href="{% url 'rentals:rental_detail' rental.pk %}" class="card border-0 shadow-sm text-decoration-none h-100" style="border-radius: 12px; transition: transform 0.2s;">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="flex-shrink-0">
+                        <i class="bi bi-file-contract" style="font-size: 2.5rem; color: #3B6FE8;"></i>
+                    </div>
+                    <div class="flex-grow-1 min-width-0">
+                        <h6 class="fw-semibold mb-1 text-truncate" style="color: #0f172a; font-size: 0.95rem;">{{ rental.property_obj.name }}</h6>
+                        <span class="badge {% if rental.status == 'active' %}bg-success{% elif rental.status == 'pending' %}bg-warning text-dark{% elif rental.status == 'terminated' %}bg-danger{% else %}bg-secondary{% endif %}" style="font-size: 0.65rem;">{{ rental.get_status_display }}</span>
+                    </div>
+                </div>
+                <div class="mb-2" style="font-size: 0.8rem; color: #64748b;">
+                    <div class="text-truncate mb-1">
+                        <i class="bi bi-house me-1 text-primary"></i>{{ rental.property_obj.city|default:"No location" }}
+                    </div>
+                    {% if rental.tenant %}
+                    <div class="text-truncate"><i class="bi bi-person me-1 text-muted"></i>{{ rental.tenant.name }}</div>
+                    {% else %}
+                    <div class="text-muted"><i class="bi bi-person me-1"></i>No tenant</div>
+                    {% endif %}
+                </div>
+                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                    <span class="fw-bold" style="color: #3B6FE8; font-size: 0.9rem;">{{ rental.monthly_rent }} {{ rental.currency }}<small class="text-muted fw-normal">/mo</small></span>
+                    <span class="text-muted" style="font-size: 0.7rem;">
+                        <i class="bi bi-calendar3 me-1"></i>{{ rental.end_date|date:"M d" }}
+                    </span>
+                </div>
+            </div>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- List View Container (Hidden by default) -->
+<div class="d-none" id="listViewContainer">
+    <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+        <div class="list-group list-group-flush">
+            {% for rental in page_obj %}
+            <a href="{% url 'rentals:rental_detail' rental.pk %}" class="list-group-item list-group-item-action py-2 px-3 d-flex justify-content-between align-items-center text-decoration-none">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="flex-shrink-0">
+                        <i class="bi bi-file-contract" style="font-size: 1.5rem; color: #3B6FE8;"></i>
+                    </div>
+                    <div>
+                        <div class="fw-semibold" style="color: #0f172a; font-size: 0.9rem;">{{ rental.property_obj.name }}</div>
+                        <div class="d-flex gap-2 text-muted" style="font-size: 0.75rem;">
+                            <span><i class="bi bi-house me-1"></i>{{ rental.property_obj.city|default:"No location" }}</span>
+                            {% if rental.tenant %}<span><i class="bi bi-person me-1"></i>{{ rental.tenant.name }}</span>{% endif %}
+                            <span><i class="bi bi-calendar3 me-1"></i>{{ rental.start_date|date:"M d" }} - {{ rental.end_date|date:"M d" }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="badge {% if rental.status == 'active' %}bg-success{% elif rental.status == 'pending' %}bg-warning text-dark{% elif rental.status == 'terminated' %}bg-danger{% else %}bg-secondary{% endif %}" style="font-size: 0.65rem;">{{ rental.get_status_display }}</span>
+                    <span class="fw-bold" style="color: #3B6FE8; font-size: 0.85rem;">{{ rental.monthly_rent }} {{ rental.currency }}</span>
+                    <i class="bi bi-chevron-right text-muted" style="font-size: 0.8rem;"></i>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Pagination -->
+{% if page_obj.has_other_pages %}
+<nav class="mt-3">
+    <ul class="pagination justify-content-center pagination-sm">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ search }}&status={{ status }}">
+                <i class="bi bi-chevron-left"></i>
+            </a>
+        </li>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <li class="page-item active">
+                <span class="page-link">{{ num }}</span>
+            </li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ num }}&search={{ search }}&status={{ status }}">{{ num }}</a>
+            </li>
+            {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ search }}&status={{ status }}">
+                <i class="bi bi-chevron-right"></i>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<!-- Empty State -->
+<div class="text-center py-5">
+    <div style="width: 100px; height: 100px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+        <i class="bi bi-file-contract" style="font-size: 3rem; color: #cbd5e1;"></i>
+    </div>
+    <h5 class="fw-bold" style="color: #0f172a;">No rentals found</h5>
+    <p class="text-muted mb-3" style="font-size: 0.85rem;">Try adjusting your filters or create your first rental agreement.</p>
+    <a href="{% url 'rentals:rental_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-2"></i>Create First Rental
+    </a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleView(view) {
+    const gridContainer = document.getElementById('gridViewContainer');
+    const listContainer = document.getElementById('listViewContainer');
+    const gridBtn = document.getElementById('gridViewBtn');
+    const listBtn = document.getElementById('listViewBtn');
+
+    if (view === 'grid') {
+        gridBtn.classList.add('active');
+        listBtn.classList.remove('active');
+        gridContainer.classList.remove('d-none');
+        listContainer.classList.add('d-none');
+    } else {
+        listBtn.classList.add('active');
+        gridBtn.classList.remove('active');
+        listContainer.classList.remove('d-none');
+        gridContainer.classList.add('d-none');
+    }
+
+    localStorage.setItem('rental_view', view);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const savedView = localStorage.getItem('rental_view');
+    if (savedView === 'list') {
+        toggleView('list');
+    }
+});
+</script>
+<style>
+.view-toggle-btn {
+    background: #fff;
+    color: #94a3b8;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s;
+}
+.view-toggle-btn.active {
+    background: #3B6FE8;
+    color: #fff;
+    border-color: #3B6FE8;
+}
+.view-toggle-btn:hover:not(.active) {
+    background: #f1f5f9;
+    color: #3B6FE8;
+}
+.list-group-item:hover {
+    background-color: #f8fafc;
+}
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+}
+</style>
+{% endblock %}

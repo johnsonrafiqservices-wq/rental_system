@@ -1,0 +1,194 @@
+{% extends 'rentals/base.html' %}
+
+{% block title %}Dashboard - Rental Management{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-1 fw-bold" style="color: #0f172a; font-size: 1.5rem;">
+            <i class="bi bi-speedometer2 me-2 text-primary"></i>Dashboard
+        </h2>
+        <p class="text-muted mb-0" style="font-size: 0.85rem;">Overview of your rental portfolio</p>
+    </div>
+    <a href="{% url 'rentals:property_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-2"></i>Add Property
+    </a>
+</div>
+
+<!-- Stats Cards - Single Row -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-4 col-lg">
+        <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+            <div class="card-body text-center py-3">
+                <div class="mb-2" style="color: #3B6FE8;">
+                    <i class="bi bi-people" style="font-size: 1.5rem;"></i>
+                </div>
+                <h5 class="fw-bold mb-1" style="color: #0f172a;">{{ total_owners }}</h5>
+                <small class="text-muted" style="font-size: 0.75rem;">Owners</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg">
+        <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+            <div class="card-body text-center py-3">
+                <div class="mb-2" style="color: #3B6FE8;">
+                    <i class="bi bi-person-badge" style="font-size: 1.5rem;"></i>
+                </div>
+                <h5 class="fw-bold mb-1" style="color: #0f172a;">{{ total_tenants }}</h5>
+                <small class="text-muted" style="font-size: 0.75rem;">Tenants</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg">
+        <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+            <div class="card-body text-center py-3">
+                <div class="mb-2" style="color: #3B6FE8;">
+                    <i class="bi bi-building" style="font-size: 1.5rem;"></i>
+                </div>
+                <h5 class="fw-bold mb-1" style="color: #0f172a;">{{ total_properties }}</h5>
+                <small class="text-muted" style="font-size: 0.75rem;">Properties</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg">
+        <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+            <div class="card-body text-center py-3">
+                <div class="mb-2" style="color: #3B6FE8;">
+                    <i class="bi bi-file-contract" style="font-size: 1.5rem;"></i>
+                </div>
+                <h5 class="fw-bold mb-1" style="color: #0f172a;">{{ active_rentals }}</h5>
+                <small class="text-muted" style="font-size: 0.75rem;">Active Rentals</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg">
+        <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+            <div class="card-body text-center py-3">
+                <div class="mb-2" style="color: #3B6FE8;">
+                    <i class="bi bi-door-open" style="font-size: 1.5rem;"></i>
+                </div>
+                <h5 class="fw-bold mb-1" style="color: #0f172a;">{{ available_properties }}</h5>
+                <small class="text-muted" style="font-size: 0.75rem;">Available</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg">
+        <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+            <div class="card-body text-center py-3">
+                <div class="mb-2" style="color: #3B6FE8;">
+                    <i class="bi bi-houses" style="font-size: 1.5rem;"></i>
+                </div>
+                <h5 class="fw-bold mb-1" style="color: #0f172a;">{{ total_rentable_units }}</h5>
+                <small class="text-muted" style="font-size: 0.75rem;">Rentable Units</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content Grid -->
+<div class="row g-4">
+    <!-- Expiring Leases -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+            <div class="card-header border-bottom d-flex justify-content-between align-items-center py-3" style="border-radius: 12px 12px 0 0; background: #f8fafc;">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-clock-history me-2" style="color: #3B6FE8;"></i>
+                    <span class="fw-semibold" style="color: #0f172a; font-size: 0.9rem;">Expiring Soon</span>
+                </div>
+                <span class="badge bg-white text-dark border" style="font-size: 0.7rem;">{{ expiring_leases|length }}</span>
+            </div>
+            <div class="card-body p-0">
+                {% if expiring_leases %}
+                <div class="list-group list-group-flush">
+                    {% for rental in expiring_leases %}
+                    <a href="{% url 'rentals:rental_detail' rental.pk %}" class="list-group-item list-group-item-action py-3 px-3 d-flex justify-content-between align-items-center text-decoration-none">
+                        <div>
+                            <div class="fw-semibold" style="color: #0f172a; font-size: 0.85rem;">{{ rental.property_obj.name }}</div>
+                            <small class="text-muted" style="font-size: 0.75rem;">Expires {{ rental.end_date|date:"M d, Y" }}</small>
+                        </div>
+                        <i class="bi bi-chevron-right text-muted" style="font-size: 0.8rem;"></i>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="bi bi-check-circle" style="font-size: 2rem; color: #cbd5e1;"></i>
+                    <p class="text-muted mt-2 mb-0" style="font-size: 0.8rem;">No expiring leases</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Properties -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+            <div class="card-header border-bottom d-flex justify-content-between align-items-center py-3" style="border-radius: 12px 12px 0 0; background: #f8fafc;">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-building me-2" style="color: #3B6FE8;"></i>
+                    <span class="fw-semibold" style="color: #0f172a; font-size: 0.9rem;">Recent Properties</span>
+                </div>
+                <a href="{% url 'rentals:property_list' %}" class="text-decoration-none" style="color: #3B6FE8; font-size: 0.8rem; font-weight: 500;">View All</a>
+            </div>
+            <div class="card-body p-0">
+                {% if recent_properties %}
+                <div class="list-group list-group-flush">
+                    {% for property in recent_properties %}
+                    <a href="{% url 'rentals:property_detail' property.pk %}" class="list-group-item list-group-item-action py-3 px-3 d-flex justify-content-between align-items-center text-decoration-none">
+                        <div>
+                            <div class="fw-semibold" style="color: #0f172a; font-size: 0.85rem;">{{ property.name }}</div>
+                            <small class="text-muted" style="font-size: 0.75rem;">{{ property.city }} · {{ property.get_property_type_display }}</small>
+                        </div>
+                        <span class="badge {% if property.is_available %}bg-success{% else %}bg-secondary{% endif %}" style="font-size: 0.65rem;">
+                            {% if property.is_available %}Available{% else %}Rented{% endif %}
+                        </span>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="bi bi-building" style="font-size: 2rem; color: #cbd5e1;"></i>
+                    <p class="text-muted mt-2 mb-0" style="font-size: 0.8rem;">No properties yet</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Rentals -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+            <div class="card-header border-bottom d-flex justify-content-between align-items-center py-3" style="border-radius: 12px 12px 0 0; background: #f8fafc;">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-file-contract me-2" style="color: #3B6FE8;"></i>
+                    <span class="fw-semibold" style="color: #0f172a; font-size: 0.9rem;">Recent Rentals</span>
+                </div>
+                <a href="{% url 'rentals:rental_list' %}" class="text-decoration-none" style="color: #3B6FE8; font-size: 0.8rem; font-weight: 500;">View All</a>
+            </div>
+            <div class="card-body p-0">
+                {% if recent_rentals %}
+                <div class="list-group list-group-flush">
+                    {% for rental in recent_rentals %}
+                    <a href="{% url 'rentals:rental_detail' rental.pk %}" class="list-group-item list-group-item-action py-3 px-3 d-flex justify-content-between align-items-center text-decoration-none">
+                        <div>
+                            <div class="fw-semibold" style="color: #0f172a; font-size: 0.85rem;">{{ rental.property_obj.name }}</div>
+                            <small class="text-muted" style="font-size: 0.75rem;">{{ rental.tenant.name|default:"No tenant" }}</small>
+                        </div>
+                        <span class="badge {% if rental.status == 'active' %}bg-success{% elif rental.status == 'pending' %}bg-warning text-dark{% else %}bg-secondary{% endif %}" style="font-size: 0.65rem;">
+                            {{ rental.get_status_display }}
+                        </span>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="bi bi-file-contract" style="font-size: 2rem; color: #cbd5e1;"></i>
+                    <p class="text-muted mt-2 mb-0" style="font-size: 0.8rem;">No rentals yet</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

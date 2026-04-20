@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice {{ invoice.invoice_number }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        @media print {
+            @page { size: A4; margin: 15mm; }
+            body { background: white; }
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: white;
+            padding: 20px;
+        }
+        .invoice-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 25px;
+        }
+        .company-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #333;
+        }
+        .company-info h1 {
+            color: #333;
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+        .company-tagline {
+            color: #666;
+            font-style: italic;
+            font-size: 0.8rem;
+        }
+        .contact-info {
+            text-align: right;
+            font-size: 0.75rem;
+            color: #333;
+        }
+        .contact-info i {
+            color: #666;
+            margin-right: 5px;
+        }
+        .document-title-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+        }
+        .document-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #000;
+            text-transform: uppercase;
+        }
+        .invoice-number-box {
+            text-align: right;
+        }
+        .invoice-label {
+            font-size: 0.75rem;
+            color: #666;
+            margin-bottom: 3px;
+        }
+        .invoice-number {
+            border: 1px solid #333;
+            color: #333;
+            padding: 6px 15px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        .invoice-meta {
+            font-size: 0.8rem;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .invoice-meta span {
+            margin-right: 20px;
+        }
+        .section-title {
+            color: #333;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+        .billing-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+        .bill-to, .bill-from {
+            font-size: 0.8rem;
+        }
+        .bill-label {
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 3px;
+        }
+        .bill-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #000;
+            margin-bottom: 5px;
+        }
+        .bill-details {
+            color: #333;
+            line-height: 1.6;
+        }
+        .invoice-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            font-size: 0.8rem;
+        }
+        .invoice-table thead {
+            background: #f5f5f5;
+            border-bottom: 2px solid #333;
+        }
+        .invoice-table th {
+            padding: 8px 10px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-align: left;
+        }
+        .invoice-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #dee2e6;
+            font-size: 0.8rem;
+        }
+        .invoice-table th:last-child,
+        .invoice-table td:last-child {
+            text-align: right;
+        }
+        .summary-section {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 15px;
+        }
+        .summary-box {
+            width: 260px;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #dee2e6;
+            font-size: 0.8rem;
+        }
+        .summary-row.total {
+            border: 2px solid #333;
+            padding: 8px 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-top: 3px;
+        }
+        .amount-paid-row {
+            border: 1px solid #198754;
+            padding: 8px 12px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 0.85rem;
+        }
+        .balance-row {
+            border: 1px solid #dc3545;
+            padding: 8px 12px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3px;
+            font-size: 0.85rem;
+        }
+        .notes-section {
+            margin-top: 20px;
+            padding: 12px;
+            border: 1px solid #dee2e6;
+            font-size: 0.8rem;
+        }
+        .signatures {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 50px;
+            padding-top: 20px;
+        }
+        .signature-line {
+            width: 45%;
+            text-align: center;
+        }
+        .signature-line .line {
+            border-top: 1px solid #000;
+            margin-bottom: 5px;
+        }
+        .signature-label {
+            font-size: 0.75rem;
+            color: #333;
+        }
+        .footer {
+            margin-top: 40px;
+            padding-top: 15px;
+            border-top: 1px solid #333;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #333;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        .status-paid { background: #198754; color: white; }
+        .status-partial { background: #ffc107; color: #000; }
+        .status-pending { background: #6c757d; color: white; }
+        .status-overdue { background: #dc3545; color: white; }
+        .print-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: #0d6efd;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .print-btn:hover {
+            background: #0b5ed7;
+        }
+        @media print {
+            body { padding: 0; }
+            .invoice-container { box-shadow: none; padding: 0; }
+            .print-btn { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <button class="print-btn no-print" onclick="window.print()">
+        <i class="bi bi-printer me-2"></i>Print Invoice
+    </button>
+
+    <div class="invoice-container">
+        <!-- Company Header -->
+        <div class="company-header">
+            <div class="company-info">
+                <h1>Property Rent</h1>
+                <div class="company-tagline">"Your Partner in Property Management & Rentals."</div>
+            </div>
+            <div class="contact-info">
+                <div><i class="bi bi-geo-alt"></i> Kampala, Uganda</div>
+                <div><i class="bi bi-telephone"></i> +256 XXX XXX XXX</div>
+                <div><i class="bi bi-envelope"></i> info@propertyrentals.com</div>
+            </div>
+        </div>
+
+        <!-- Document Title & Invoice Number -->
+        <div class="document-title-section">
+            <div>
+                <div class="document-title">
+                    Rental Invoice
+                    <span class="status-badge status-{{ invoice.status }}">{{ invoice.get_status_display }}</span>
+                </div>
+            </div>
+            <div class="invoice-number-box">
+                <div class="invoice-label">INVOICE NO</div>
+                <div class="invoice-number">{{ invoice.invoice_number }}</div>
+            </div>
+        </div>
+
+        <!-- Invoice Meta -->
+        <div class="invoice-meta">
+            <span><strong>Issue Date:</strong> {{ invoice.issue_date|date:"F d, Y" }}</span>
+            <span><strong>Due Date:</strong> {{ invoice.due_date|date:"F d, Y" }}</span>
+            <span><strong>Period:</strong> {{ invoice.period_start|date:"M d, Y" }} - {{ invoice.period_end|date:"M d, Y" }}</span>
+        </div>
+
+        <!-- Billing Info -->
+        <div class="billing-grid">
+            <div class="bill-to">
+                <div class="section-title">Bill To</div>
+                <div class="bill-name">{{ invoice.rental.tenant.name }}</div>
+                <div class="bill-details">
+                    <div>{{ invoice.rental.tenant.email|default:"" }}</div>
+                    <div>{{ invoice.rental.tenant.phone|default:"" }}</div>
+                    <div>{{ invoice.rental.tenant.address|default:"" }}</div>
+                </div>
+            </div>
+            <div class="bill-from">
+                <div class="section-title">Property Details</div>
+                <div class="bill-name">{{ invoice.rental.property_obj.name }}</div>
+                <div class="bill-details">
+                    <div>{{ invoice.rental.property_obj.address|default:"" }}</div>
+                    <div>{{ invoice.rental.property_obj.city|default:"" }}, {{ invoice.rental.property_obj.country|default:"" }}</div>
+                    <div>Owner: {{ invoice.rental.property_obj.owner.name }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Invoice Items -->
+        <div class="section-title">Invoice Details</div>
+        <table class="invoice-table">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th style="text-align: right;">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <strong>Rent for {{ invoice.period_start|date:"F Y" }}</strong><br>
+                        <small class="text-muted">Period: {{ invoice.period_start|date:"M d, Y" }} - {{ invoice.period_end|date:"M d, Y" }}</small>
+                    </td>
+                    <td>{{ invoice.currency }} {{ invoice.rent_amount|floatformat:0 }}</td>
+                </tr>
+                {% if invoice.additional_charges > 0 %}
+                <tr>
+                    <td>Additional Charges</td>
+                    <td>{{ invoice.currency }} {{ invoice.additional_charges|floatformat:0 }}</td>
+                </tr>
+                {% endif %}
+                {% if invoice.tax_amount > 0 %}
+                <tr>
+                    <td>Tax</td>
+                    <td>{{ invoice.currency }} {{ invoice.tax_amount|floatformat:0 }}</td>
+                </tr>
+                {% endif %}
+                {% if invoice.discount > 0 %}
+                <tr>
+                    <td>Discount</td>
+                    <td style="color: #198754;">-{{ invoice.currency }} {{ invoice.discount|floatformat:0 }}</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+
+        <!-- Summary -->
+        <div class="summary-section">
+            <div class="summary-box">
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span>{{ invoice.currency }} {{ invoice.rent_amount|add:invoice.additional_charges|add:invoice.tax_amount|floatformat:0 }}</span>
+                </div>
+                {% if invoice.discount > 0 %}
+                <div class="summary-row">
+                    <span>Discount:</span>
+                    <span style="color: #198754;">-{{ invoice.currency }} {{ invoice.discount|floatformat:0 }}</span>
+                </div>
+                {% endif %}
+                <div class="summary-row total">
+                    <span>TOTAL DUE:</span>
+                    <span>{{ invoice.currency }} {{ invoice.total_amount|floatformat:0 }}</span>
+                </div>
+                {% if invoice.amount_paid > 0 %}
+                <div class="amount-paid-row">
+                    <span>Amount Paid:</span>
+                    <span>{{ invoice.currency }} {{ invoice.amount_paid|floatformat:0 }}</span>
+                </div>
+                {% endif %}
+                {% if invoice.balance_due > 0 %}
+                <div class="balance-row">
+                    <span>BALANCE DUE:</span>
+                    <span>{{ invoice.currency }} {{ invoice.balance_due|floatformat:0 }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if invoice.notes %}
+        <div class="notes-section">
+            <strong>Notes:</strong><br>
+            {{ invoice.notes|linebreaksbr }}
+        </div>
+        {% endif %}
+
+        <!-- Signatures -->
+        <div class="signatures">
+            <div class="signature-line">
+                <div class="line"></div>
+                <div class="signature-label">Authorized Signature</div>
+            </div>
+            <div class="signature-line">
+                <div class="line"></div>
+                <div class="signature-label">Tenant Signature</div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <strong>Landlord Contact:</strong> {{ invoice.rental.property_obj.owner.phone|default:"N/A" }}<br>
+            <small>Thank you for your business</small>
+        </div>
+    </div>
+
+    <script>
+        window.onload = function() {
+            // Auto-print when page loads (optional)
+            // setTimeout(() => window.print(), 500);
+        };
+    </script>
+</body>
+</html>

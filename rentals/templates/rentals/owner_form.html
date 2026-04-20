@@ -1,0 +1,151 @@
+{% extends 'rentals/base.html' %}
+
+{% block title %}Register Owner - Rental Management{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="mb-3"><i class="bi bi-person-plus me-2"></i>Register Owner</h2>
+        <a href="{% url 'rentals:owner_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back to Owners
+        </a>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="post" action="{% url 'rentals:owner_create' %}">
+                    {% csrf_token %}
+                    
+                    <h5 class="mb-3">Owner Type</h5>
+                    <div class="mb-4">
+                        {{ form.owner_type.errors }}
+                        <label class="form-label">{{ form.owner_type.label }}</label>
+                        {{ form.owner_type }}
+                        <small class="text-muted">Select whether this is a company or an individual</small>
+                    </div>
+
+                    <h5 class="mb-3">Company Information</h5>
+                    <div class="mb-4 p-3 bg-light rounded">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.company_name.errors }}
+                                <label class="form-label">{{ form.company_name.label }}</label>
+                                {{ form.company_name }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.registration_number.errors }}
+                                <label class="form-label">{{ form.registration_number.label }}</label>
+                                {{ form.registration_number }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.tax_id.errors }}
+                                <label class="form-label">{{ form.tax_id.label }}</label>
+                                {{ form.tax_id }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="mb-3">Individual Information</h5>
+                    <div class="mb-4 p-3 bg-light rounded">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.first_name.errors }}
+                                <label class="form-label">{{ form.first_name.label }}</label>
+                                {{ form.first_name }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.last_name.errors }}
+                                <label class="form-label">{{ form.last_name.label }}</label>
+                                {{ form.last_name }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.national_id.errors }}
+                                <label class="form-label">{{ form.national_id.label }}</label>
+                                {{ form.national_id }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="mb-3">Contact Information</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.email.errors }}
+                            <label class="form-label">{{ form.email.label }}</label>
+                            {{ form.email }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.phone.errors }}
+                            <label class="form-label">{{ form.phone.label }}</label>
+                            {{ form.phone }}
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            {{ form.address.errors }}
+                            <label class="form-label">{{ form.address.label }}</label>
+                            {{ form.address }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.city.errors }}
+                            <label class="form-label">{{ form.city.label }}</label>
+                            {{ form.city }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.country.errors }}
+                            <label class="form-label">{{ form.country.label }}</label>
+                            {{ form.country }}
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'rentals:owner_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-1"></i>Register Owner
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ownerTypeSelect = document.querySelector('select[name="owner_type"]');
+    const companyFields = ['company_name', 'registration_number', 'tax_id'];
+    const individualFields = ['first_name', 'last_name', 'national_id'];
+    
+    function toggleFields() {
+        const ownerType = ownerTypeSelect.value;
+        
+        companyFields.forEach(field => {
+            const input = document.querySelector(`[name="${field}"]`);
+            const container = input.closest('.col-md-6');
+            if (ownerType === 'company') {
+                container.style.display = 'block';
+                if (field === 'company_name') input.required = true;
+            } else {
+                container.style.display = 'none';
+                input.required = false;
+            }
+        });
+        
+        individualFields.forEach(field => {
+            const input = document.querySelector(`[name="${field}"]`);
+            const container = input.closest('.col-md-6');
+            if (ownerType === 'individual') {
+                container.style.display = 'block';
+                if (field === 'first_name' || field === 'last_name') input.required = true;
+            } else {
+                container.style.display = 'none';
+                input.required = false;
+            }
+        });
+    }
+    
+    ownerTypeSelect.addEventListener('change', toggleFields);
+    toggleFields(); // Initial state
+});
+</script>
+{% endblock %}

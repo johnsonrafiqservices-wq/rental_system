@@ -1,0 +1,435 @@
+{% extends 'rentals/base.html' %}
+
+{% block title %}Financial Report{% endblock %}
+
+{% block content %}
+<div class="container py-3 report-compact">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="mb-1 fw-800" style="color: #0f172a;"><i class="bi bi-graph-up-arrow me-2"></i>Financial Report</h4>
+            <p class="text-muted mb-0">Income, expenses, and projections overview</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'billing:budget_list' %}" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-wallet2 me-1"></i>Budgets
+            </a>
+            <a href="{% url 'billing:expense_list' %}" class="btn btn-outline-success btn-sm">
+                <i class="bi bi-cash-coin me-1"></i>Expenses
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4 border-0 shadow-sm" style="border-radius: 12px;">
+        <div class="card-body py-3">
+            <form method="get" class="row g-2 align-items-end">
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold">From Date</label>
+                    <input type="date" name="from_date" class="form-control form-control-sm" value="{{ from_date }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold">To Date</label>
+                    <input type="date" name="to_date" class="form-control form-control-sm" value="{{ to_date }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Property</label>
+                    <select name="property" class="form-select form-select-sm">
+                        <option value="">All Properties</option>
+                        {% for property in properties %}
+                        <option value="{{ property.pk }}" {% if selected_property == property.pk|stringformat:"s" %}selected{% endif %}>{{ property.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold">Owner</label>
+                    <select name="owner" class="form-select form-select-sm">
+                        <option value="">All Owners</option>
+                        {% for owner in owners %}
+                        <option value="{{ owner.pk }}" {% if selected_owner == owner.pk|stringformat:"s" %}selected{% endif %}>{{ owner.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Rental</label>
+                    <select name="rental" class="form-select form-select-sm">
+                        <option value="">All Rentals</option>
+                        {% for rental in rentals %}
+                        <option value="{{ rental.pk }}" {% if selected_rental == rental.pk|stringformat:"s" %}selected{% endif %}>{{ rental.rental_number }} - {{ rental.property_obj.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="bi bi-filter me-1"></i>Apply Filter
+                    </button>
+                    <a href="{% url 'billing:financial_report' %}" class="btn btn-outline-secondary btn-sm ms-2">Reset</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm" style="border-radius: 12px; border-left: 4px solid #10b981 !important;">
+                <div class="card-body py-3">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <small class="text-muted d-block">Total Income</small>
+                            <div class="fs-4 fw-bold text-success">{{ income|floatformat:0 }}</div>
+                        </div>
+                        <div class="text-success"><i class="bi bi-arrow-up-circle fs-2"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm" style="border-radius: 12px; border-left: 4px solid #ef4444 !important;">
+                <div class="card-body py-3">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <small class="text-muted d-block">Total Expenses</small>
+                            <div class="fs-4 fw-bold text-danger">{{ expenses|floatformat:0 }}</div>
+                        </div>
+                        <div class="text-danger"><i class="bi bi-arrow-down-circle fs-2"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm" style="border-radius: 12px; border-left: 4px solid #3B6FE8 !important;">
+                <div class="card-body py-3">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <small class="text-muted d-block">Net Income</small>
+                            <div class="fs-4 fw-bold" style="color: {% if net_income >= 0 %}#10b981{% else %}#ef4444{% endif %}">{{ net_income|floatformat:0 }}</div>
+                        </div>
+                        <div class="text-primary"><i class="bi bi-cash-stack fs-2"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm" style="border-radius: 12px; border-left: 4px solid #f59e0b !important;">
+                <div class="card-body py-3">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <small class="text-muted d-block">Pending Income</small>
+                            <div class="fs-4 fw-bold text-warning">{{ pending_income|floatformat:0 }}</div>
+                        </div>
+                        <div class="text-warning"><i class="bi bi-hourglass-split fs-2"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-4">
+        <!-- Monthly Trend Chart -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+                <div class="card-header bg-white py-3" style="border-radius: 12px 12px 0 0;">
+                    <h6 class="mb-0 fw-bold">Income vs Expenses Trend (6 Months)</h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="trendChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Budget Utilization -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+                <div class="card-header bg-white py-3" style="border-radius: 12px 12px 0 0;">
+                    <h6 class="mb-0 fw-bold">Budget Utilization</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Total Budgeted</span>
+                            <span class="fw-bold">{{ total_budgeted|floatformat:0 }}</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar" role="progressbar" style="width: 100%; background-color: #e2e8f0;"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Total Spent</span>
+                            <span class="fw-bold text-danger">{{ total_spent|floatformat:0 }}</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-danger" role="progressbar" style="width: {{ budget_utilization }}%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Remaining</span>
+                            <span class="fw-bold text-success">{{ budget_remaining|floatformat:0 }}</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ 100|add:budget_utilization|add:-100 }}%"></div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <div class="fs-3 fw-bold" style="color: {% if budget_utilization > 90 %}#ef4444{% elif budget_utilization > 70 %}#f59e0b{% else %}#10b981{% endif %}">{{ budget_utilization }}%</div>
+                        <small class="text-muted">Budget Used</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expenses by Category & Projections -->
+    <div class="row g-4 mb-4">
+        <!-- Expenses by Category -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+                <div class="card-header bg-white py-3" style="border-radius: 12px 12px 0 0;">
+                    <h6 class="mb-0 fw-bold">Expenses by Category</h6>
+                </div>
+                <div class="card-body p-0">
+                    {% if expenses_by_category %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 compact-table">
+                            <thead>
+                                <tr>
+                                    <th class="ps-3">Category</th>
+                                    <th class="pe-3 text-end">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cat in expenses_by_category %}
+                                <tr class="compact-row">
+                                    <td class="ps-3">{{ cat.budget_item__category|default:"Uncategorized"|title }}</td>
+                                    <td class="pe-3 text-end fw-bold">{{ cat.total|floatformat:0 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <p class="text-muted mb-0">No expense data for this period</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Financial Projections -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+                <div class="card-header bg-white py-3" style="border-radius: 12px 12px 0 0;">
+                    <h6 class="mb-0 fw-bold">Financial Projections</h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small">Based on average monthly income ({{ avg_monthly_income|floatformat:0 }}) and expenses ({{ avg_monthly_expense|floatformat:0 }})</p>
+                    
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-4">
+                            <div class="text-center p-3 bg-light rounded">
+                                <div class="fs-5 fw-bold" style="color: {% if projection_3_month >= 0 %}#10b981{% else %}#ef4444{% endif %}">{{ projection_3_month|floatformat:0 }}</div>
+                                <small class="text-muted">3 Month Net</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center p-3 bg-light rounded">
+                                <div class="fs-5 fw-bold" style="color: {% if projection_6_month >= 0 %}#10b981{% else %}#ef4444{% endif %}">{{ projection_6_month|floatformat:0 }}</div>
+                                <small class="text-muted">6 Month Net</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center p-3 bg-light rounded">
+                                <div class="fs-5 fw-bold" style="color: {% if projection_12_month >= 0 %}#10b981{% else %}#ef4444{% endif %}">{{ projection_12_month|floatformat:0 }}</div>
+                                <small class="text-muted">12 Month Net</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Property Performance -->
+    <div class="card border-0 shadow-sm" style="border-radius: 12px; overflow: hidden;">
+        <div class="card-header bg-white py-3" style="border-radius: 12px 12px 0 0;">
+            <h6 class="mb-0 fw-bold">Property Performance</h6>
+        </div>
+        <div class="card-body p-0">
+            {% if property_performance %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 compact-table">
+                    <thead>
+                        <tr>
+                            <th class="ps-3">Property</th>
+                            <th>Income</th>
+                            <th>Expenses</th>
+                            <th class="pe-3 text-end">Net</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prop in property_performance %}
+                        <tr class="compact-row">
+                            <td class="ps-3">
+                                <a href="{% url 'rentals:property_detail' prop.property.pk %}" class="compact-title">{{ prop.property.name }}</a>
+                            </td>
+                            <td class="text-success fw-semibold">{{ prop.income|floatformat:0 }}</td>
+                            <td class="text-danger fw-semibold">{{ prop.expenses|floatformat:0 }}</td>
+                            <td class="pe-3 text-end fw-bold" style="color: {% if prop.net >= 0 %}#10b981{% else %}#ef4444{% endif %}">{{ prop.net|floatformat:0 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <p class="text-muted mb-0">No property performance data available</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js for trend chart -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('trendChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ months|safe }},
+            datasets: [
+                {
+                    label: 'Income',
+                    data: {{ income_trend|safe }},
+                    backgroundColor: '#10b981',
+                    borderRadius: 4,
+                },
+                {
+                    label: 'Expenses',
+                    data: {{ expense_trend|safe }},
+                    backgroundColor: '#ef4444',
+                    borderRadius: 4,
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: '#f1f5f9'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+<style>
+    .report-compact {
+        font-size: 0.92rem;
+    }
+    .report-compact .card {
+        border-radius: 10px !important;
+    }
+    .report-compact .card-body {
+        padding: 0.85rem 0.9rem;
+    }
+    .report-compact .card-header.py-3 {
+        padding-top: 0.6rem !important;
+        padding-bottom: 0.6rem !important;
+    }
+    .report-compact .fw-bold,
+    .report-compact .fw-800 {
+        font-weight: 600 !important;
+    }
+    .report-compact h4,
+    .report-compact h6 {
+        margin-bottom: 0.15rem;
+        letter-spacing: 0;
+    }
+    .report-compact .fs-4 {
+        font-size: 1.3rem !important;
+    }
+    .report-compact .fs-5 {
+        font-size: 1.05rem !important;
+    }
+    .report-compact .fs-3 {
+        font-size: 1.45rem !important;
+    }
+    .report-compact .row.g-3,
+    .report-compact .row.g-4 {
+        --bs-gutter-x: 0.8rem;
+        --bs-gutter-y: 0.8rem;
+    }
+    .report-compact .mb-4 {
+        margin-bottom: 0.9rem !important;
+    }
+    .report-compact .btn.btn-sm {
+        padding: 0.3rem 0.55rem;
+        font-size: 0.78rem;
+    }
+    .report-compact .form-label.small {
+        font-size: 0.72rem;
+        margin-bottom: 0.25rem;
+    }
+    .report-compact .form-control-sm,
+    .report-compact .form-select-sm {
+        font-size: 0.78rem;
+        padding-top: 0.22rem;
+        padding-bottom: 0.22rem;
+    }
+    .report-compact .table td,
+    .report-compact .table th {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+    .compact-table {
+        font-size: 0.85rem;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    .compact-table thead th {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 0.75rem 0.5rem;
+        border-bottom: 1px solid #e2e8f0;
+        background: #f8fafc;
+    }
+    .compact-table tbody tr {
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .compact-table tbody td {
+        padding: 0.6rem 0.5rem;
+        vertical-align: middle;
+    }
+    .compact-title {
+        font-weight: 500;
+        color: #0f172a;
+        text-decoration: none;
+        font-size: 0.85rem;
+    }
+    .compact-title:hover {
+        color: #3B6FE8;
+    }
+</style>
+{% endblock %}

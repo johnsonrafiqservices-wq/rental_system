@@ -1,0 +1,251 @@
+{% extends 'rentals/base.html' %}
+
+{% block title %}{{ agreement.title }} - Rental Agreement{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2>{{ agreement.title }}</h2>
+        <p class="text-muted mb-0">Agreement Number: {{ agreement.agreement_number }}</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'rentals:rental_detail' agreement.rental.pk %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back to Rental
+        </a>
+        <a href="{% url 'rentals:rental_agreement_print' agreement.pk %}" class="btn btn-outline-dark" target="_blank">
+            <i class="bi bi-printer me-1"></i>Print Agreement
+        </a>
+        {% if agreement.agreement_file %}
+        <a href="{{ agreement.agreement_file.url }}" download class="btn btn-success">
+            <i class="bi bi-download me-1"></i>Download Document
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <!-- Agreement Details -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Agreement Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="text-muted small">Agreement Type</label>
+                            <div class="fw-semibold">{{ agreement.get_agreement_type_display }}</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-muted small">Status</label>
+                            <div>
+                                <span class="badge {% if agreement.status == 'active' %}bg-success{% elif agreement.status == 'signed' %}bg-primary{% elif agreement.status == 'pending_signature' %}bg-warning text-dark{% elif agreement.status == 'expired' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                    {{ agreement.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-muted small">Effective Date</label>
+                            <div class="fw-semibold">{{ agreement.effective_date|date:"M d, Y" }}</div>
+                        </div>
+                        {% if agreement.expiry_date %}
+                        <div class="mb-3">
+                            <label class="text-muted small">Expiry Date</label>
+                            <div class="fw-semibold">{{ agreement.expiry_date|date:"M d, Y" }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        {% if agreement.signed_date %}
+                        <div class="mb-3">
+                            <label class="text-muted small">Signed Date</label>
+                            <div class="fw-semibold">{{ agreement.signed_date|date:"M d, Y" }}</div>
+                        </div>
+                        {% endif %}
+                        <div class="mb-3">
+                            <label class="text-muted small">Payment Frequency</label>
+                            <div class="fw-semibold">{{ agreement.get_payment_frequency_display }}</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-muted small">Created</label>
+                            <div class="fw-semibold">{{ agreement.created_at|date:"M d, Y H:i" }}</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-muted small">Last Updated</label>
+                            <div class="fw-semibold">{{ agreement.updated_at|date:"M d, Y H:i" }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Financial Terms -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Financial Terms</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="text-muted small">Rent Amount</label>
+                            <div class="fw-semibold">{{ agreement.rent_amount }} {{ agreement.currency }}</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-muted small">Security Deposit</label>
+                            <div class="fw-semibold">{{ agreement.security_deposit }} {{ agreement.currency }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="text-muted small">Deposit Status</label>
+                            <div>
+                                {% if agreement.deposit_paid %}
+                                <span class="badge bg-success">Paid</span>
+                                {% else %}
+                                <span class="badge bg-warning text-dark">Not Paid</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Terms and Conditions -->
+        {% if agreement.terms %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Terms and Conditions</h5>
+            </div>
+            <div class="card-body">
+                <div class="bg-light p-3 rounded">
+                    {{ agreement.terms|linebreaks }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Special Conditions -->
+        {% if agreement.special_conditions %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Special Conditions</h5>
+            </div>
+            <div class="card-body">
+                <div class="bg-light p-3 rounded">
+                    {{ agreement.special_conditions|linebreaks }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Document -->
+        {% if agreement.agreement_file %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Agreement Document</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-file-earmark-text fs-4 me-3 text-primary"></i>
+                    <div class="flex-grow-1">
+                        <div class="fw-semibold">Signed Agreement</div>
+                        <div class="text-muted small">{{ agreement.agreement_file.name|slice:"-20:" }}</div>
+                    </div>
+                    <a href="{{ agreement.agreement_file.url }}" download class="btn btn-outline-primary">
+                        <i class="bi bi-download me-1"></i>Download
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-md-4">
+        <!-- Related Rental -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Related Rental</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="text-muted small">Property</label>
+                    <div class="fw-semibold">
+                        <a href="{% url 'rentals:property_detail' agreement.rental.property_obj.pk %}" class="text-decoration-none">
+                            {{ agreement.rental.property_obj.name }}
+                        </a>
+                    </div>
+                </div>
+                {% if agreement.rental.tenant %}
+                <div class="mb-3">
+                    <label class="text-muted small">Tenant</label>
+                    <div class="fw-semibold">
+                        <a href="{% url 'rentals:tenant_detail' agreement.rental.tenant.pk %}" class="text-decoration-none">
+                            {{ agreement.rental.tenant.name }}
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+                <div class="mb-3">
+                    <label class="text-muted small">Rental Period</label>
+                    <div class="fw-semibold">
+                        {{ agreement.rental.start_date|date:"M d, Y" }} - {{ agreement.rental.end_date|date:"M d, Y" }}
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="text-muted small">Rental Status</label>
+                    <div>
+                        <span class="badge {% if agreement.rental.status == 'active' %}bg-success{% elif agreement.rental.status == 'pending' %}bg-warning{% elif agreement.rental.status == 'expired' %}bg-danger{% else %}bg-secondary{% endif %}">
+                            {{ agreement.rental.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+                <a href="{% url 'rentals:rental_detail' agreement.rental.pk %}" class="btn btn-outline-primary btn-sm w-100">
+                    <i class="bi bi-eye me-1"></i>View Rental Details
+                </a>
+            </div>
+        </div>
+
+        <!-- Signatures -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Signatures</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="text-muted small">Tenant Signature</label>
+                    <div>
+                        {% if agreement.tenant_signature %}
+                        <img src="{{ agreement.tenant_signature.url }}" alt="Tenant Signature" class="img-fluid border rounded" style="max-height: 100px;">
+                        {% else %}
+                        <span class="text-muted">Not signed yet</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="text-muted small">Landlord Signature</label>
+                    <div>
+                        {% if agreement.landlord_signature %}
+                        <img src="{{ agreement.landlord_signature.url }}" alt="Landlord Signature" class="img-fluid border rounded" style="max-height: 100px;">
+                        {% else %}
+                        <span class="text-muted">Not signed yet</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="text-muted small">Witness Signature</label>
+                    <div>
+                        {% if agreement.witness_signature %}
+                        <img src="{{ agreement.witness_signature.url }}" alt="Witness Signature" class="img-fluid border rounded" style="max-height: 100px;">
+                        {% else %}
+                        <span class="text-muted">Not signed yet</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
