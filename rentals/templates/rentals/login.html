@@ -70,15 +70,31 @@
         .input-group .form-control { border-left: none; }
         .btn-submit { width: 100%; padding: 0.72rem; font-weight: 700; border-radius: 8px; font-size: 0.95rem; }
 
-        .mkt-feature { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; font-size: 0.88rem; color: #94a3b8; }
-        .mkt-feature i { color: #3B6FE8; font-size: 1.1rem; flex-shrink: 0; }
+        .marketplace-link-panel {
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+            padding: 2rem;
+            color: #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100%;
+        }
+        .marketplace-link-panel h5 {
+            color: #fff;
+            font-size: 1.25rem;
+            font-weight: 800;
+            margin-bottom: 0.6rem;
+        }
+        .marketplace-link-panel p {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
         .btn-mkt { background: linear-gradient(135deg, var(--mkt), var(--mkt-dark)); color: #fff; border: none; width: 100%; padding: 0.72rem; font-weight: 700; border-radius: 8px; font-size: 0.95rem; }
         .btn-mkt:hover { opacity: 0.9; color: #fff; }
-        .btn-mkt-outline { background: transparent; color: #3B6FE8; border: 2px solid #3B6FE8; width: 100%; padding: 0.65rem; font-weight: 600; border-radius: 8px; font-size: 0.9rem; margin-top: 0.75rem; }
-        .btn-mkt-outline:hover { background: rgba(59,111,232,0.1); color: #3B6FE8; }
-        .divider { display: flex; align-items: center; gap: 0.75rem; margin: 1rem 0; }
-        .divider::before, .divider::after { content:""; flex:1; height:1px; background:#2d3748; }
-        .divider span { color: #4b5563; font-size: 0.78rem; white-space: nowrap; }
     </style>
 </head>
 <body>
@@ -136,32 +152,13 @@
             </div>
         </div>
 
-        <!-- ── Room Marketplace ── -->
-        <div class="portal-card portal-mkt">
-            <div class="portal-card-header">
-                <i class="bi bi-house-heart"></i>
-                <h5>Room Marketplace</h5>
-                <p>Find a room or list your spare room for free</p>
-            </div>
-            <div class="portal-mkt-body">
-                <div class="mkt-feature"><i class="bi bi-search-heart"></i>Search thousands of rooms to rent</div>
-                <div class="mkt-feature"><i class="bi bi-house-door"></i>Post your room and find tenants fast</div>
-                <div class="mkt-feature"><i class="bi bi-envelope-open"></i>Message landlords directly</div>
-                <div class="mkt-feature"><i class="bi bi-heart"></i>Save your favourite listings</div>
-
-                <div class="divider"><span>Ready to get started?</span></div>
-
-                <a href="/marketplace/login/" class="btn btn-mkt">
-                    <i class="bi bi-box-arrow-in-right me-2"></i>Sign In to Marketplace
-                </a>
-                <a href="/marketplace/register/" class="btn btn-mkt-outline">
-                    <i class="bi bi-person-plus me-2"></i>Create Free Account
-                </a>
-
-                <div class="text-center mt-3" style="font-size:0.8rem;color:#4b5563;">
-                    Join as a <strong style="color:#3B6FE8;">Room Seeker</strong> or <strong style="color:#3B6FE8;">Landlord</strong>
-                </div>
-            </div>
+        <!-- ── Marketplace Link ── -->
+        <div class="marketplace-link-panel">
+            <h5><i class="bi bi-house-heart me-2" style="color:#3B6FE8;"></i>Room Marketplace</h5>
+            <p>Looking for rooms or want to post one?</p>
+            <a href="/marketplace/login/" class="btn btn-mkt">
+                <i class="bi bi-box-arrow-in-right me-2"></i>Go to Marketplace
+            </a>
         </div>
 
     </div>
