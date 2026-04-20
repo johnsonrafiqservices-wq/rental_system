@@ -695,15 +695,15 @@
                     </ul>
                 </div>
 
-                {% if listing.qr_code_image %}
+                {% if qr_image_url %}
                 <div class="qr-room-card mt-3">
                     <div class="qr-title"><i class="bi bi-qr-code-scan me-1" style="color:#3B6FE8;"></i>Scan Room QR</div>
                     <div class="qr-subtitle">Scan to open this room directly</div>
                     <div class="text-center mb-2">
-                        <img src="{{ listing.qr_code_image.url }}" alt="QR code for {{ listing.title }}" class="qr-image">
+                        <img src="{{ qr_image_url }}" alt="QR code for {{ listing.title }}" class="qr-image">
                     </div>
                     <div class="text-center">
-                        <a href="{{ listing.qr_code_image.url }}" download="{{ listing.title|slugify }}-qr.png" class="btn btn-outline-secondary btn-sm" style="font-size:0.74rem;">
+                        <a href="{{ qr_download_url }}" class="btn btn-outline-secondary btn-sm" style="font-size:0.74rem;">
                             <i class="bi bi-download me-1"></i>Download QR
                         </a>
                     </div>

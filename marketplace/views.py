@@ -3,9 +3,11 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.db.models import Q
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_POST
 from django.utils import timezone
+from django.urls import reverse
+from urllib.parse import urlencode
 
 from .models import MarketplaceProfile, RoomListing, ListingPhoto, SavedListing, Enquiry
 from .forms import (
@@ -193,11 +195,46 @@ def listing_detail(request, pk):
         'is_saved': is_saved,
         'enquiry_form': enquiry_form,
         'today': timezone.now().date(),
+        'qr_target_url': request.build_absolute_uri(request.get_full_path()),
+        'qr_image_url': f"{reverse('marketplace:listing_qr', kwargs={'pk': listing.pk})}?{urlencode({'target': request.build_absolute_uri(request.get_full_path())})}",
+        'qr_download_url': f"{reverse('marketplace:listing_qr', kwargs={'pk': listing.pk})}?{urlencode({'target': request.build_absolute_uri(request.get_full_path()), 'download': '1'})}",
         'other_listings': RoomListing.objects.filter(
             landlord=listing.landlord, status='active'
         ).exclude(pk=pk)[:3],
     }
     return render(request, 'marketplace/listing_detail.html', context)
+
+
+def listing_qr(request, pk):
+    listing = get_object_or_404(RoomListing, pk=pk)
+    target_url = request.GET.get('target') or request.build_absolute_uri(
+        reverse('marketplace:listing_detail', kwargs={'pk': listing.pk})
+    )
+
+    try:
+        import qrcode
+        from io import BytesIO
+
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_M,
+            box_size=10,
+            border=4,
+        )
+        qr.add_data(target_url)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color='black', back_color='white')
+
+        buffer = BytesIO()
+        img.save(buffer, format='PNG')
+        buffer.seek(0)
+
+        response = HttpResponse(buffer.getvalue(), content_type='image/png')
+        if request.GET.get('download') == '1':
+            response['Content-Disposition'] = f'attachment; filename="room_{listing.pk}_qr.png"'
+        return response
+    except ImportError:
+        return HttpResponse('QR library is not installed on this server.', status=500)
 
 
 # ──────────────────────────────────────────────

@@ -13,6 +13,7 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('rooms/', views.listing_list, name='listing_list'),
     path('rooms/<uuid:pk>/', views.listing_detail, name='listing_detail'),
+    path('rooms/<uuid:pk>/qr/', views.listing_qr, name='listing_qr'),
 
     # Landlord
     path('rooms/post/', views.post_listing, name='post_listing'),
