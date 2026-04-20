@@ -139,7 +139,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Base URL used when generating QR codes (update to match your server address)
-SITE_URL = 'http://192.168.100.179:8000'
+SITE_URL = 'http://16.170.254.230'
 
 # Authentication
 AUTHENTICATION_BACKENDS = [

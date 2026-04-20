@@ -8,6 +8,7 @@ from django.views.decorators.http import require_POST
 from django.utils import timezone
 from django.urls import reverse
 from urllib.parse import urlencode
+from django.conf import settings
 
 from .models import MarketplaceProfile, RoomListing, ListingPhoto, SavedListing, Enquiry
 from .forms import (
@@ -189,15 +190,22 @@ def listing_detail(request, pk):
             messages.success(request, 'Your enquiry has been sent to the landlord!')
             return redirect('marketplace:listing_detail', pk=pk)
 
+    public_base_url = getattr(settings, 'SITE_URL', '').rstrip('/')
+    qr_target_url = (
+        f"{public_base_url}{request.get_full_path()}"
+        if public_base_url
+        else request.build_absolute_uri(request.get_full_path())
+    )
+
     context = {
         'listing': listing,
         'photos': listing.photos.all(),
         'is_saved': is_saved,
         'enquiry_form': enquiry_form,
         'today': timezone.now().date(),
-        'qr_target_url': request.build_absolute_uri(request.get_full_path()),
-        'qr_image_url': f"{reverse('marketplace:listing_qr', kwargs={'pk': listing.pk})}?{urlencode({'target': request.build_absolute_uri(request.get_full_path())})}",
-        'qr_download_url': f"{reverse('marketplace:listing_qr', kwargs={'pk': listing.pk})}?{urlencode({'target': request.build_absolute_uri(request.get_full_path()), 'download': '1'})}",
+        'qr_target_url': qr_target_url,
+        'qr_image_url': f"{reverse('marketplace:listing_qr', kwargs={'pk': listing.pk})}?{urlencode({'target': qr_target_url})}",
+        'qr_download_url': f"{reverse('marketplace:listing_qr', kwargs={'pk': listing.pk})}?{urlencode({'target': qr_target_url, 'download': '1'})}",
         'other_listings': RoomListing.objects.filter(
             landlord=listing.landlord, status='active'
         ).exclude(pk=pk)[:3],
@@ -207,9 +215,13 @@ def listing_detail(request, pk):
 
 def listing_qr(request, pk):
     listing = get_object_or_404(RoomListing, pk=pk)
-    target_url = request.GET.get('target') or request.build_absolute_uri(
-        reverse('marketplace:listing_detail', kwargs={'pk': listing.pk})
+    public_base_url = getattr(settings, 'SITE_URL', '').rstrip('/')
+    fallback_url = (
+        f"{public_base_url}{reverse('marketplace:listing_detail', kwargs={'pk': listing.pk})}"
+        if public_base_url
+        else request.build_absolute_uri(reverse('marketplace:listing_detail', kwargs={'pk': listing.pk}))
     )
+    target_url = request.GET.get('target') or fallback_url
 
     try:
         import qrcode
